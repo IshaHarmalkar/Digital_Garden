@@ -21,7 +21,7 @@ class NativeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type' => 'required| in:text, image',
+            'type' => 'required|in:text, image',
             'content' => 'nullable|string',
             'image_path' => 'nullable|image|max:2048',
             'url' => 'nullable|url',

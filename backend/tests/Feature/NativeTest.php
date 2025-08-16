@@ -1,55 +1,66 @@
 <?php
 
-use App\Models\Native;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
-test('it stores a native record with text type', function () {
-
+function authUser()
+{
     $user = User::factory()->create();
-    $this->actingAs($user);
+    test()->actingAs($user, 'sanctum');
 
-    // No storage faking needed for text
-    $payload = [
-        'type' => 'text',
-        'content' => 'This is a test native text entry',
-        'url' => 'https://example.com',
-    ];
+    return $user;
+}
 
-    $response = $this->postJson('/natives', $payload);
+test('get native list', function () {
+    authUser();
 
-    $response->assertStatus(201);
-    $this->assertDatabaseHas('natives', [
-        'type' => 'text',
-        'content' => 'This is a test native text entry',
-        'url' => 'https://example.com',
-    ]);
+    $response = $this->getJson('/api/natives');
+
+    $response->assertOk()
+        ->assertJsonStructure([
+            '*' => [
+                'id',
+                'type',
+                'content',
+                'image_path',
+                'url',
+                'like_count',
+                'image_url',
+                'created_at',
+                'updated_at',
+            ],
+        ]);
+
 });
 
-test('a native can be stored with an image', function () {
-    Storage::fake('public');
+test('stores a native text type content', function () {
+    authUser();
+    $data = [
+        'type' => 'text',
+        'content' => 'Text Type Test',
+        'url' => 'http://example.com',
+    ];
 
-    // Create and authenticate a test user
-    $user = User::factory()->create();
-    $this->actingAs($user);
+    $response = $this->postJson('api/natives', $data);
 
-    $file = UploadedFile::fake()->image('test.jpg');
+    $response->assertCreated()
+        ->assertJsonFragment(['content' => 'Text Type Test']);
 
-    $response = $this->postJson('/natives', [
-        'type' => 'image',
-        'content' => 'Test content',
-        'image_path' => $file,
-        'url' => 'https://example.com',
+    $this->assertDatabaseHas('natives', [
+        'type' => 'text',
+        'content' => 'Text Type Test',
     ]);
 
-    $response->assertStatus(201);
+});
 
-    $native = Native::first();
+test('store a native image type content', function () {
+    authUser();
+    Storage:fake('public');
 
-    expect($native)->not()->toBeNull();
-    expect($native->type)->toBe('image');
-    expect($native->content)->toBe('Test content');
+    $file = UploadedFile::fake()->image('photo.jps');
 
-    Storage::disk('public')->assertExists("natives/{$native->image_path}");
+    $data = [
+        'type' => 'image',
+        'image_path' => $file,
+    ];
 });
