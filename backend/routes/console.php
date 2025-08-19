@@ -17,8 +17,8 @@ Artisan::command('inspire', function () {
 
 // })->weeklyOn(7, '9:00');
 
-Schedule::call(function () {
+// Schedule::call(function () {
 
-    Mail::to('example@email.com')->send(new WeeklyNewsletterMail);
+//     Mail::to('')->send(new WeeklyNewsletterMail);
 
-})->everyMinute();
+// })->weekly(1, 9.00);
