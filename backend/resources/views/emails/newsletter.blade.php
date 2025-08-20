@@ -17,10 +17,6 @@ Here's your curated review for the week:
 @endif
 
 
-
-
-
-
 @if($native->url)
 
 <x-mail::button :url="$native->url">
@@ -28,13 +24,21 @@ Visit Link
 </x-mail::button>
 @endif
 
-
-👍🏽Likes: {{ $native->like_count ?? 0}}
-
+💗Likes: {{ $native->like_count ?? 0}}
 
 @empty
 _No new posts this week.
 @endforelse
+
+---
+
+## Your Notion Reads
+
+@foreach ($notionPages as $page)
+-[{{ $page['title'] }}]({{$page['url']}})    
+@endforeach
+
+---
 
 
 That's it for this week. All the best for the new week.<br>

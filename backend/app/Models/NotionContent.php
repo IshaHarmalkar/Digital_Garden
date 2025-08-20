@@ -12,6 +12,7 @@ class NotionContent extends Model
     protected $fillable = [
         'notion_page_id',
         'title',
+        'last_edited_time',
 
     ];
 

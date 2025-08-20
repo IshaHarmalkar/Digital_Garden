@@ -10,15 +10,16 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Schedule::call(function()
-// {
+Schedule::call(function () {
+    $recipient = env('NEWSLETTER_RECIPIENT');
+    Mail::to($recipient)->send(new WeeklyNewsletterMail);
 
-//         Mail::to('example@email.com')->send(new WeeklyNewsletterMail());
-
-// })->weeklyOn(7, '9:00');
+})->weeklyOn(7, '9:00');
 
 // Schedule::call(function () {
 
-//     Mail::to('')->send(new WeeklyNewsletterMail);
+//     Mail::to('example@email.com')->send(new WeeklyNewsletterMail);
 
 // })->weekly(1, 9.00);
+
+Schedule::command('notion:sync YOUR_DATABASE_ID')->daily();

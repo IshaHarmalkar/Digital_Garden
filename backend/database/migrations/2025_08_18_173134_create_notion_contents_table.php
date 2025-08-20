@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('notion_page_id')->unique();
             $table->string('title')->nullable();
+            $table->timestamp('last_edited_time')->nullable();
             $table->timestamps();
         });
     }

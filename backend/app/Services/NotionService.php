@@ -42,11 +42,10 @@ class NotionService
             $simplifiedPages = [];
             foreach ($pages as $page) {
 
-                $title = $page->getTitle();
-
                 $simplifiedPages[] = [
                     'id' => $page->getId(),
-                    'title' => $title,
+                    'title' => $page->getTitle(),
+                    'last_edited_time' => $page->getLastEditedTime()?->format('Y-m-d H:i:s'),
                 ];
             }
 

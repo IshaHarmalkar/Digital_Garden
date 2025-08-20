@@ -3,11 +3,13 @@
 namespace App\Mail;
 
 use App\Models\Native;
+use App\Models\NotionContent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Notion;
 
 class WeeklyNewsletterMail extends Mailable
 {
@@ -15,15 +17,30 @@ class WeeklyNewsletterMail extends Mailable
 
     public $items;
 
+    public $notionPages;
+
     /**
      * Create a new message instance.
      */
     public function __construct()
     {
-        $this->items = native::where('created_at', '>=', now()->subWeek())
+        $this->items = Native::where('created_at', '>=', now()->subWeek())
             ->inRandomOrder()
             ->limit(5)
             ->get();
+
+        // notion content
+        $notionContents = NotionContent::inRandomOrder()->limit(2)->get();
+
+        $this->notionPages = $notionContents->map(function ($content) {
+            $page = Notion::pages()->find($content->notion_page_id);
+
+            return [
+                'title' => $content->title,
+                'url' => $page->getUrl(),
+            ];
+        });
+
     }
 
     /**
@@ -45,6 +62,7 @@ class WeeklyNewsletterMail extends Mailable
             markdown: 'emails.newsletter',
             with: [
                 'items' => $this->items,
+                'notionPages' => $this->notionPages,
             ],
         );
     }
