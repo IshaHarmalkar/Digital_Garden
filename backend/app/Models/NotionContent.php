@@ -20,4 +20,9 @@ class NotionContent extends Model
     {
         return $this->morphMany(Comment::class, 'commentable');
     }
+
+    public function stats()
+    {
+        return $this->morphOne(Stat::class, 'statable');
+    }
 }
