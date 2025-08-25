@@ -44,6 +44,9 @@ class SyncNotionContents extends Command
 
         $this->info('Found '.count($pages).' pages in Notion.');
 
+        // start progress bar
+        $this->output->progressStart(count($pages));
+
         foreach ($pages as $page) {
             $record = NotionContent::where('notion_page_id', $page['id'])->first();
 
@@ -65,7 +68,12 @@ class SyncNotionContents extends Command
 
                 $this->info("Updated: {$page['title']}");
             }
+
+            $this->output->progressAdvance();
         }
+
+        // finish progress bar
+        $this->output->progressFinish();
 
         $this->info('Sync Complete!');
 
