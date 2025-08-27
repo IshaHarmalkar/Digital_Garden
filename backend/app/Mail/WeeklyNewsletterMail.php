@@ -3,13 +3,12 @@
 namespace App\Mail;
 
 use App\Models\Native;
-use App\Models\NotionContent;
+use App\Models\NativeQueue;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Notion;
 
 class WeeklyNewsletterMail extends Mailable
 {
@@ -24,23 +23,45 @@ class WeeklyNewsletterMail extends Mailable
      */
     public function __construct()
     {
-        $this->items = Native::where('created_at', '>=', now()->subWeek())
-            ->inRandomOrder()
-            ->limit(5)
-            ->get();
+        $this->items = $this->curateNative();
+        $this->notionPages = $this->curateNotion();
+    }
 
-        // notion content
-        $notionContents = NotionContent::inRandomOrder()->limit(2)->get();
+    // Selecting Native Content
+    private function curateNative()
+    {
+        $nativeItems = collect();
 
-        $this->notionPages = $notionContents->map(function ($content) {
-            $page = Notion::pages()->find($content->notion_page_id);
+        // check priority Q
+        $priority = NativeQueue::priority()->oldestInQueue()->first();
+        if ($priority) {
+            $content = $priority->native;
+            $nativeItems->push($content);
 
-            return [
-                'title' => $content->title,
-                'url' => $page->getUrl(),
-            ];
-        });
+            // Update Stats
+            $content->stats()->updateOrCreate([], [
+                'last_seen_at' => now(),
+            ]);
 
+            // log to newsletter
+
+        }
+
+        // main Native
+        $main = NativeQueue::main()->oldestInQueue()->first();
+        if ($main) {
+            $content = $main->native;
+            $nativeItems->push($content);
+
+            $content->newsletters()->create();
+            $content->stats()->updateOrCreate([], [
+                'last_seen_at' => now(),
+            ]);
+
+            $main->delete();
+        }
+
+        return $nativeItems;
     }
 
     /**

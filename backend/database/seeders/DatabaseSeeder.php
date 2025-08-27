@@ -22,6 +22,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             NativeSeeder::class,
+            NativeQueueSeeder::class,
+            NotionQueueSeeder::class,
+
         ]);
     }
 }
