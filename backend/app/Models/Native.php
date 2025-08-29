@@ -31,4 +31,9 @@ class Native extends Model
         ? asset('storage/natives/'.$this->image_path)
         : null;
     }
+
+    public function stats()
+    {
+        return $this->morphOne(Stat::class, 'statable');
+    }
 }

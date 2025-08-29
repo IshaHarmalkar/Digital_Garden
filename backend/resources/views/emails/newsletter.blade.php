@@ -3,6 +3,8 @@
 
 Here's your curated review for the week:
 
+{{--Native Items --}}
+
 @forelse($items as $native)
 ---
 
@@ -32,11 +34,16 @@ _No new posts this week.
 
 ---
 
+@if($notionPages->isNotEmpty())
 ## Your Notion Reads
 
 @foreach ($notionPages as $page)
 -[{{ $page['title'] }}]({{$page['url']}})    
 @endforeach
+@else
+_No new Notion Reads this week._
+@endif
+
 
 ---
 

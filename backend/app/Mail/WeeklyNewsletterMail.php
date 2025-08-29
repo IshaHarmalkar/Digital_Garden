@@ -4,6 +4,8 @@ namespace App\Mail;
 
 use App\Models\Native;
 use App\Models\NativeQueue;
+use App\Models\Newsletter;
+use App\Models\NotionContent;
 use App\Models\NotionQueue;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -16,9 +18,8 @@ class WeeklyNewsletterMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-
-    
     public $items;
+
     public $notionPages;
 
     /**
@@ -26,111 +27,106 @@ class WeeklyNewsletterMail extends Mailable
      */
     public function __construct()
     {
-        $curated = collect();
-        
-        $this->items = $this->curateNative();
-        $this->notionPages = $this->curateNotion();
+        // get items
+        $nativeItems = $this->getNativeItems();
+        $notionItems = $this->getNotionItems();
+
+        // merge and log
+        $curated = $nativeItems->merge($notionItems);
+        $this->saveNewsletter($curated);
+
+        $this->items = $this->mapNativeItems($nativeItems ?? collect());
+        $this->notionPages = $this->mapNotionPages($notionItems ?? collect());
+
     }
 
-    // Selecting Native Content
-    private function curateNative()
+    private function getNativeItems()
     {
         $nativeItems = collect();
 
-        // check priority Q
         $priority = NativeQueue::priority()->oldestInQueue()->first();
         if ($priority) {
-            $content = $priority->native;
-            $nativeItems->push($content);
-
-            // Update Stats
-            $content->stats()->updateOrCreate([], [
-                'last_seen_at' => now(),
-            ]);
-
-            //pop 
+            $nativeItems->push(['type' => 'Native', 'id' => $priority->native_id]);
+            $priority->native->stats()->updateOrCreate(['native_id' => $priority->native_id], ['last_sent_at' => now()]);
+            // pop
             $priority->delete();
+        }
 
-
-        //main q for native
         $main = NativeQueue::main()->oldestInQueue()->first();
-        if($main){
-            $content = $main->native;
-            $nativeItems->push($content);
-
-            $content->newsletters()->create();
-            $content->stats()->updateOrCreate([], [
-                'last_sent_at' => now(),
-            ]);
-
+        if ($main) {
+            $nativeItems->push(['type' => 'Native', 'id' => $main->native_id]);
+            $main->native->stats()->updateOrCreate([], ['last_sent_at' => now()]);
             $main->delete();
-
         }
 
         return $nativeItems;
 
-            // log to newsletter
-
     }
 
-       
-    }
-
-    private function curateNotion()
+    private function getNotionItems()
     {
         $notionItems = collect();
-
-        //priority 
         $priority = NotionQueue::priority()->oldestInQueue()->first();
-        if($priority){
-            $content = $priority->notionContent;
-            $notionItems->push($content);
-
-            $content->newsletters()->create();
-            $content->stats()->updateOrCreate([], [
-                'last_sent_at' => now(),
-            ]);
-
+        if ($priority) {
+            $notionItems->push(['type' => 'Notion', 'id' => $priority->notion_content_id]);
+            $priority->notionContent->stats()->updateOrCreate([], ['last_sent_at' => now()]);
             $priority->delete();
         }
 
-        //oldest + new curate
-        if($notionItems->isEmpty()){
+        $oldest = null;
+        $newest = null;
+
+        if ($notionItems->isEmpty()) {
             $oldest = NotionQueue::main()->oldestInQueue()->first();
             $newest = NotionQueue::main()->newestInQueue()->first();
 
-            foreach([$oldest, $newest] as $queueItem){
-                if($queueItem){
-
-                    $content = $queueItem->notionContent;
-                    $notionItems->push($content);
-
-                    $content->newsletters()->create();
-                    $content->stats()->updateOrCreate([], [
-                        'last_sent_at' => now(),
-                    ]);
-
+            foreach ([$oldest, $newest] as $queueItem) {
+                if ($queueItem) {
+                    $notionItems->push(['type' => 'Notion', 'id' => $queueItem->notion_content_id]);
+                    $queueItem->notionContent->stats()->updateOrCreate([], ['last_sent_at' => now()]);
                     $queueItem->delete();
                 }
             }
+
         }
 
+        return $notionItems;
 
-        //map to title + URL format for email
+    }
 
-        return $notionItems->map(function($content){
+    private function saveNewsletter($curated)
+    {
+        // creare a single newsletter record with all curated items
+        Newsletter::create([
+            'curated_items' => $curated->toArray(),
+        ]);
+    }
+
+    private function mapNotionPages($notionItems)
+    {
+        return collect($notionItems)->map(function ($item) {
+            $content = NotionContent::find($item['id']);
+            if (! $content) {
+                return null;
+            }
 
             $page = Notion::pages()->find($content->notion_page_id);
 
-            return[
-                'titile' => $content->title,
+            return [
+                'title' => $content->title,
                 'url' => $page->getUrl(),
             ];
-        });
+        })->filter(); // remove nulls
     }
 
+    private function mapNativeItems($nativeItems)
+    {
 
+        return $nativeItems->map(function ($item) {
+            return Native::find($item['id']);
+        });
 
+    }
 
     /**
      * Get the message envelope.
