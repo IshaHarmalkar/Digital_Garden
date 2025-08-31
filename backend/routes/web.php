@@ -23,6 +23,9 @@ Route::get('/notion-database-details', function (NotionService $notionService) {
     return response()->json($data);
 });
 
+Route::get('/newsletter-feedback', [NewsletterController::class, 'feedback'])
+    ->name('newsletter.feedback');
+
 Route::get('/notion-pages', function (NotionService $notionService) {
     $databaseId = env('NOTION_DATABASE_ID');
     $data = $notionService->getPagesFromDatabase($databaseId);

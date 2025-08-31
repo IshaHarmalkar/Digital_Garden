@@ -3,6 +3,21 @@
 
 Here's your curated review for the week:
 
+---
+{{-- Unsplash Image --}}
+<div style="text-align: center; margin: 20px 0;">
+    <a href="https://unsplash.com/photos/abstract-teal-oval-shape-on-light-blue-background-LqeIetcaGb8">
+        <img src="https://i.pinimg.com/150x150/10/10/48/10104839bad015f187e6d1e53652ff81.jpg" 
+             alt="Abstract teal oval shape on light blue background" 
+             style="max-width: 400px; height: auto; border-radius: 8px; border: 1px solid #ddd;">
+    </a>
+    <p style="font-size: 12px; color: #666; margin-top: 8px;">
+        <a href="https://unsplash.com/photos/abstract-teal-oval-shape-on-light-blue-background-LqeIetcaGb8">View on Unsplash</a>
+    </p>
+</div>
+
+---
+
 {{--Native Items --}}
 
 @forelse($items as $native)
@@ -26,7 +41,13 @@ Visit Link
 </x-mail::button>
 @endif
 
-💗Likes: {{ $native->like_count ?? 0}}
+💗Likes: {{ $native->stats->like_count ?? 0}}
+❓See Again: {{ $native->stats->see_again_soon ? 'Yes' : 'No'}}
+
+{{-- feedback links --}}
+[👍Like]({{ route('newsletter.feedback', ['type' => 'native', 'id' => $native->id, 'action' => 'like'])}})
+[🌻 See Again]({{ route('newsletter.feedback', ['type' => 'native', 'id' => $native->id, 'action' =>  'see_again'])}})
+
 
 @empty
 _No new posts this week.
@@ -39,6 +60,13 @@ _No new posts this week.
 
 @foreach ($notionPages as $page)
 -[{{ $page['title'] }}]({{$page['url']}})    
+💗Likes: {{$page['like_count']}}
+❓See Again: {{ $page['see_again_soon'] ? 'Yes' : 'No'}}
+
+{{-- feedback links --}}
+[👍Like]({{ route('newsletter.feedback', ['type' => 'notion', 'id' => $page['id'], 'action' => 'like'])}})
+[🌻 See Again]({{ route('newsletter.feedback', ['type' => 'notion', 'id' => $page['id'], 'action' =>  'see_again'])}})
+
 @endforeach
 @else
 _No new Notion Reads this week._

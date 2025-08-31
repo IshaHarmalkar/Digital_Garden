@@ -105,7 +105,7 @@ class WeeklyNewsletterMail extends Mailable
     private function mapNotionPages($notionItems)
     {
         return collect($notionItems)->map(function ($item) {
-            $content = NotionContent::find($item['id']);
+            $content = NotionContent::with('stats')->find($item['id']);
             if (! $content) {
                 return null;
             }
@@ -113,8 +113,11 @@ class WeeklyNewsletterMail extends Mailable
             $page = Notion::pages()->find($content->notion_page_id);
 
             return [
+                'id' => $content->id,
                 'title' => $content->title,
                 'url' => $page->getUrl(),
+                'like_count' => $content->stats->like_count ?? 0,
+                'see_again_soon' => $content->stats->see_again_soon ?? false,
             ];
         })->filter(); // remove nulls
     }
@@ -123,7 +126,11 @@ class WeeklyNewsletterMail extends Mailable
     {
 
         return $nativeItems->map(function ($item) {
-            return Native::find($item['id']);
+
+            $native = Native::with('stats')->find($item['id']);
+
+            return $native;
+
         });
 
     }

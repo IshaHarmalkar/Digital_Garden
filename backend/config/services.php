@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'pinterest' => [
+        'base_url' => env('PINTEREST_BASE_URL', 'https://api.pinterest.com/v5'),
+        'access_token' => env('PINTEREST_ACCESS_TOKEN'),
+    ],
+
 ];
