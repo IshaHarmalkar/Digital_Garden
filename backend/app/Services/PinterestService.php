@@ -70,12 +70,44 @@ class PinterestService
 
                     }
 
+                    $src = null;
+                    $images = $pin['media']['images'] ?? [];
+                    // LOG THE DEBUGGING INFO
+                    Log::info('Processing Pin', [
+                        'pin_id' => $pin['id'],
+                        'available_image_sizes' => array_keys($images),
+                    ]);
+
+                    if (isset($images['600x']['url'])) {
+                        $src = $images['600x']['url'];
+                    } elseif (isset($images['400x300']['url'])) {
+                        $src = $images['400x300']['url'];
+                    } elseif (isset($images['150x150']['url'])) {
+                        $src = $images['150x150']['url'];
+                    } elseif (isset($images['1200x']['url'])) {
+                        $src = $images['1200x']['url'];
+                    }
+                    Log::info('Raw src before parsing', ['src' => $src]);
+                    if ($src) {
+                        $src = parse_url($src, PHP_URL_PATH);
+                        $src = ltrim($src, '/');
+                    }
+
+                    Log::info('Final src being saved', [
+                        'pin_id' => $pin['id'],
+                        'src' => $src,
+                    ]);
+
                     PinterestContent::updateOrCreate(
                         [
                             'pin_id' => $pin['id'],
                             'board_id' => $boardId,
+
                         ],
-                        []
+                        [
+                            'src' => $src,
+
+                        ]
                     );
 
                     $totalSaved++;

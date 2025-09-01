@@ -3,19 +3,23 @@
 
 Here's your curated review for the week:
 
----
-{{-- Unsplash Image --}}
-<div style="text-align: center; margin: 20px 0;">
-    <a href="https://unsplash.com/photos/abstract-teal-oval-shape-on-light-blue-background-LqeIetcaGb8">
-        <img src="https://i.pinimg.com/150x150/10/10/48/10104839bad015f187e6d1e53652ff81.jpg" 
-             alt="Abstract teal oval shape on light blue background" 
-             style="max-width: 400px; height: auto; border-radius: 8px; border: 1px solid #ddd;">
-    </a>
-    <p style="font-size: 12px; color: #666; margin-top: 8px;">
-        <a href="https://unsplash.com/photos/abstract-teal-oval-shape-on-light-blue-background-LqeIetcaGb8">View on Unsplash</a>
-    </p>
-</div>
 
+
+
+
+
+---
+
+<div style="text-align: center; margin: 20px 0;">
+    <a href="https://assets.pinterest.com/ext/embed.html?id=1121326007249900221">
+           <img src="https://i.pinimg.com/736x/25/6a/ff/256aff3f1a0483bb1fb0a8b62b896052.jpg"            
+             style="max-width: 400px; height: auto; border-radius: 8px; border: 1px solid #ddd;">
+    Go to Pin
+            </a>   
+
+
+
+</div>
 ---
 
 {{--Native Items --}}
