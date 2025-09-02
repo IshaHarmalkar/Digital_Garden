@@ -20,7 +20,7 @@ class PinterestContent extends Model
         return $query->where('board_id', $boardId);
     }
 
-    public function stat()
+    public function stats()
     {
         return $this->morphOne(Stat::class, 'statable');
     }

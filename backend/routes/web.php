@@ -12,6 +12,10 @@ Route::get('/preview/newsletter', function () {
     return (new WeeklyNewsletterMail)->render();
 });
 
+Route::get('/test-page', function () {
+    return view('test');
+});
+
 Route::get('/notion-database-details', function (NotionService $notionService) {
     $databaseId = env('NOTION_DATABASE_ID');
     $data = $notionService->getDatabaseDetails($databaseId);

@@ -7,6 +7,8 @@ use App\Models\NativeQueue;
 use App\Models\Newsletter;
 use App\Models\NotionContent;
 use App\Models\NotionQueue;
+use App\Models\PinterestContent;
+use App\Models\PinterestQueue;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -22,6 +24,8 @@ class WeeklyNewsletterMail extends Mailable
 
     public $notionPages;
 
+    public $pins;
+
     /**
      * Create a new message instance.
      */
@@ -30,13 +34,15 @@ class WeeklyNewsletterMail extends Mailable
         // get items
         $nativeItems = $this->getNativeItems();
         $notionItems = $this->getNotionItems();
+        $pinterestItems = $this->getPinterestItems();
 
         // merge and log
-        $curated = $nativeItems->merge($notionItems);
+        $curated = $nativeItems->merge($notionItems)->merge($pinterestItems);
         $this->saveNewsletter($curated);
 
         $this->items = $this->mapNativeItems($nativeItems ?? collect());
         $this->notionPages = $this->mapNotionPages($notionItems ?? collect());
+        $this->pins = $this->mapPinterestPins($pinterestItems ?? collect());
 
     }
 
@@ -94,6 +100,36 @@ class WeeklyNewsletterMail extends Mailable
 
     }
 
+    private function getPinterestItems()
+    {
+        $pinterestItems = collect();
+
+        $priority = PinterestQueue::priority()->oldestInQueue()->first();
+        if ($priority) {
+            $pinterestItems->push(['type' => 'Pinterest', 'id' => $priority->pinterest_content_id]);
+            $priority->pinterestContent->stats()->updateOrCreate([], ['last_sent_at' => now()]);
+            $priority->delete();
+        }
+
+        $oldest = null;
+        $newest = null;
+
+        if ($pinterestItems->isEmpty()) {
+            $oldest = PinterestQueue::main()->oldestInQueue()->first();
+            $newest = PinterestQueue::main()->newestInQueue()->first();
+
+            foreach ([$oldest, $newest] as $queueItem) {
+                if ($queueItem) {
+                    $pinterestItems->push(['type' => 'Pinterest', 'id' => $queueItem->pinterest_content_id]);
+                    $queueItem->pinterestContent->stats()->updateOrCreate([], ['last_sent_at' => now()]);
+                    $queueItem->delete();
+                }
+            }
+        }
+
+        return $pinterestItems;
+    }
+
     private function saveNewsletter($curated)
     {
         // creare a single newsletter record with all curated items
@@ -135,6 +171,26 @@ class WeeklyNewsletterMail extends Mailable
 
     }
 
+    private function mapPinterestPins($pinterestItems)
+    {
+        return collect($pinterestItems)->map(function ($item) {
+            $pin = PinterestContent::with('stats')->find($item['id']);
+            if (! $pin) {
+                return null;
+            }
+
+            return [
+                'id' => $pin->id,
+                'pin_id' => $pin->pin_id,
+                'board_id' => $pin->board_id,
+                'link' => $pin->pin_link,
+                'image' => $pin->pin_img,
+                'embed' => $pin->embed_code,
+                'like_count' => $pin->stats->like_count ?? 0,
+            ];
+        })->filter();
+    }
+
     /**
      * Get the message envelope.
      */
@@ -155,6 +211,7 @@ class WeeklyNewsletterMail extends Mailable
             with: [
                 'items' => $this->items,
                 'notionPages' => $this->notionPages,
+                'pins' => $this->pins,
             ],
         );
     }

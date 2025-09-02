@@ -10,16 +10,59 @@ Here's your curated review for the week:
 
 ---
 
+
+{{-- Pinterest Pins --}}
+<div>
+  
+</div>
+@if($pins->isNotEmpty())
+## Your Pinterest Inspiration
+@foreach ($pins as $pin)
 <div style="text-align: center; margin: 20px 0;">
-    <a href="https://assets.pinterest.com/ext/embed.html?id=1121326007249900221">
-           <img src="https://i.pinimg.com/736x/25/6a/ff/256aff3f1a0483bb1fb0a8b62b896052.jpg"            
-             style="max-width: 400px; height: auto; border-radius: 8px; border: 1px solid #ddd;">
-    Go to Pin
-            </a>   
+
+ 
+  {{-- mail/pins.blade.php --}}
+@foreach ($pins as $pin)
+<div style="text-align: center; margin: 20px 0;">
+    <a href="{{ $pin['link'] }}" target="_blank">
+        <img src="{{ $pin['image'] }}" alt="Pinterest Pin" style="max-width:100%; border-radius: 8px;" />
+    </a>
+    <div style="margin-top: 10px;">
+        📌 <a href="{{ $pin['link'] }}" target="_blank">Go to Pin</a>
+    </div>
+    <div style="margin-top: 10px;">💗 Likes: {{ $pin['like_count'] }}</div>
+</div>
+@endforeach
+
+
+    {{-- Browser Env --}}
+
+  <div class="pinterest-embed">
+    <iframe 
+        src="{{ $pin['embed'] }}" 
+        height="336" 
+        width="236" 
+        frameborder="0" 
+        scrolling="no">
+    </iframe>
+    
+  </div>
 
 
 
 </div>
+💗Likes: {{ $pin['like_count'] }}
+{{-- feedback links --}}
+[👍Like]({{ route('newsletter.feedback', ['type' => 'pinterest', 'id' => $pin['id'], 'action' => 'like'])}})
+[🌻 See Again]({{ route('newsletter.feedback', ['type' => 'pinterest', 'id' => $pin['id'], 'action' => 'see_again'])}})
+
+---
+
+@endforeach
+@else
+*No new Pinterest pins this week.*
+@endif
+
 ---
 
 {{--Native Items --}}
