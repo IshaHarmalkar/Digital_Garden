@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\NewsletterController;
 use App\Mail\WeeklyNewsletterMail;
 use App\Services\NotionService;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +12,13 @@ Route::get('/', function () {
 Route::get('/preview/newsletter', function () {
     return (new WeeklyNewsletterMail)->render();
 });
+
+// Newsletter feedback routes
+Route::get('/newsletter-feedback/{newsletterId}', [NewsletterController::class, 'show'])
+    ->name('newsletter.feedback');
+
+Route::post('/newsletter-feedback/{newsletterId}', [NewsletterController::class, 'handleFeedback'])
+    ->name('newsletter.feedback.submit');
 
 Route::get('/test-page', function () {
     return view('test');
@@ -26,9 +34,6 @@ Route::get('/notion-database-details', function (NotionService $notionService) {
 
     return response()->json($data);
 });
-
-Route::get('/newsletter-feedback', [NewsletterController::class, 'feedback'])
-    ->name('newsletter.feedback');
 
 Route::get('/notion-pages', function (NotionService $notionService) {
     $databaseId = env('NOTION_DATABASE_ID');

@@ -212,6 +212,7 @@ class WeeklyNewsletterMail extends Mailable
                 'items' => $this->items,
                 'notionPages' => $this->notionPages,
                 'pins' => $this->pins,
+                'newsletterId' => Newsletter::latest()->first()->id,
             ],
         );
     }

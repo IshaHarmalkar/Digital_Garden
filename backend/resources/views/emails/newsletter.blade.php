@@ -1,4 +1,5 @@
 <x-mail::message>
+
 # Weeky Review
 
 Here's your curated review for the week:
@@ -35,26 +36,12 @@ Here's your curated review for the week:
 @endforeach
 
 
-    {{-- Browser Env --}}
-
-  <div class="pinterest-embed">
-    <iframe 
-        src="{{ $pin['embed'] }}" 
-        height="336" 
-        width="236" 
-        frameborder="0" 
-        scrolling="no">
-    </iframe>
-    
-  </div>
-
 
 
 </div>
 💗Likes: {{ $pin['like_count'] }}
 {{-- feedback links --}}
-[👍Like]({{ route('newsletter.feedback', ['type' => 'pinterest', 'id' => $pin['id'], 'action' => 'like'])}})
-[🌻 See Again]({{ route('newsletter.feedback', ['type' => 'pinterest', 'id' => $pin['id'], 'action' => 'see_again'])}})
+
 
 ---
 
@@ -92,8 +79,7 @@ Visit Link
 ❓See Again: {{ $native->stats->see_again_soon ? 'Yes' : 'No'}}
 
 {{-- feedback links --}}
-[👍Like]({{ route('newsletter.feedback', ['type' => 'native', 'id' => $native->id, 'action' => 'like'])}})
-[🌻 See Again]({{ route('newsletter.feedback', ['type' => 'native', 'id' => $native->id, 'action' =>  'see_again'])}})
+
 
 
 @empty
@@ -111,8 +97,6 @@ _No new posts this week.
 ❓See Again: {{ $page['see_again_soon'] ? 'Yes' : 'No'}}
 
 {{-- feedback links --}}
-[👍Like]({{ route('newsletter.feedback', ['type' => 'notion', 'id' => $page['id'], 'action' => 'like'])}})
-[🌻 See Again]({{ route('newsletter.feedback', ['type' => 'notion', 'id' => $page['id'], 'action' =>  'see_again'])}})
 
 @endforeach
 @else
@@ -124,5 +108,15 @@ _No new Notion Reads this week._
 
 
 That's it for this week. All the best for the new week.<br>
+
+## 📝 Share Your Feedback
+
+Your feedback helps us improve future newsletters:
+
+<x-mail::button :url="route('newsletter.feedback', $newsletterId)">
+Rate This Week's Content
+</x-mail::button>
+
+<br>
 {{ config('app.name') }}
 </x-mail::message>
