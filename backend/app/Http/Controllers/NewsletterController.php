@@ -3,77 +3,77 @@
 namespace App\Http\Controllers;
 
 use App\Models\Native;
+use App\Models\Newsletter;
 use App\Models\NotionContent;
 use App\Models\PinterestContent;
+use App\Models\Stat;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class NewsletterController extends Controller
 {
-    public function show($newsletterId)
+    public function showFeedback($newsletterId)
     {
-        return view('newsletter.feedback', compact('newsletterId'));
-    }
+        $newsletter = Newsletter::findOrFail($newsletterId);
 
-    public function handleFeedback(Request $request, $newsletterId)
-    {
-        $request->validate([
-            'content_type' => 'required|in:native,notion,pinterest',
-            'content_id' => 'required|integer',
-            'action' => 'required|in:like,see_again',
+        $hydrated = collect($newsletter->curated_items)->map(function ($item) {
+            switch ($item['type']) {
+                case 'Native':
+                    return [
+                        'type' => 'Native',
+                        'model' => Native::with('stats')->find($item['id']),
+                    ];
+                case 'Notion':
+                    return [
+                        'type' => 'Notion',
+                        'model' => NotionContent::with('stats')->find($item['id']),
+                    ];
+                case 'Pinterest':
+                    return [
+                        'type' => 'Pinterest',
+                        'model' => PinterestContent::with('stats')->find($item['id']),
+                    ];
+            }
+        })->filter();
+
+        return view('newsletter.feedback', [
+            'curated' => $hydrated,
+            'newsletter' => $newsletter,
         ]);
-
-        $contentType = $request->content_type;
-        $contentId = $request->content_id;
-        $action = $request->action;
-
-        try {
-            DB::transaction(function () use ($contentType, $contentId, $action) {
-                $model = $this->getModel($contentType, $contentId);
-
-                if (! $model) {
-                    throw new \Exception('Content not found');
-                }
-
-                $stats = $model->stats()->firstOrCreate([
-                    'statable_type' => get_class($model),
-                    'statable_id' => $model->id,
-                ], [
-                    'like_count' => 0,
-                    'see_again_soon' => false,
-                ]);
-
-                if ($action === 'like') {
-                    $stats->increment('like_count');
-                } elseif ($action === 'see_again') {
-                    $stats->update(['see_again_soon' => true]);
-                }
-            });
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Feedback recorded successfully!',
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to record feedback: '.$e->getMessage(),
-            ], 500);
-        }
     }
 
-    private function getModel($contentType, $contentId)
+    public function submitFeedback(Request $request)
     {
-        switch ($contentType) {
-            case 'native':
-                return Native::find($contentId);
-            case 'notion':
-                return NotionContent::find($contentId);
-            case 'pinterest':
-                return PinterestContent::find($contentId);
-            default:
-                return null;
+        $statsInput = $request->input('stats', []);
+
+        foreach ($statsInput as $type => $items) {
+            foreach ($items as $id => $statData) {
+                $statId = $statData['stat_id'] ?? null;
+
+                if ($statId) {
+                    // Update existing stat
+                    Stat::where('id', $statId)->update([
+                        'like_count' => $statData['like_count'] ?? 0,
+                        'see_again_soon' => isset($statData['see_again_soon']),
+                    ]);
+                } else {
+                    // Create new stat if none exists
+                    $modelClass = match ($type) {
+                        'Native' => Native::class,
+                        'Notion' => NotionContent::class,
+                        'Pinterest' => PinterestContent::class,
+                    };
+
+                    $model = $modelClass::find($id);
+                    if ($model) {
+                        $model->stats()->create([
+                            'like_count' => $statData['like_count'] ?? 0,
+                            'see_again_soon' => isset($statData['see_again_soon']),
+                        ]);
+                    }
+                }
+            }
         }
+
+        return back()->with('success', 'Feedback saved!');
     }
 }

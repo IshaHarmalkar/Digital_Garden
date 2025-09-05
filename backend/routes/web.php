@@ -14,10 +14,10 @@ Route::get('/preview/newsletter', function () {
 });
 
 // Newsletter feedback routes
-Route::get('/newsletter-feedback/{newsletterId}', [NewsletterController::class, 'show'])
-    ->name('newsletter.feedback');
+Route::get('/newsletter/{newsletter}/feedback', [NewsletterController::class, 'showFeedback'])
+    ->name('newsletter.feedback.show');
 
-Route::post('/newsletter-feedback/{newsletterId}', [NewsletterController::class, 'handleFeedback'])
+Route::post('/newsletter/feedback', [NewsletterController::class, 'submitFeedback'])
     ->name('newsletter.feedback.submit');
 
 Route::get('/test-page', function () {

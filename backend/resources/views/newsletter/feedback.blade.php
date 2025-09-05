@@ -1,199 +1,263 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Newsletter Feedback</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        .container {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .feedback-section {
-            margin-bottom: 25px;
-            padding: 20px;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            background-color: #f8f9fa;
-        }
-        .feedback-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-like {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-like:hover {
-            background-color: #c82333;
-        }
-        .btn-see-again {
-            background-color: #28a745;
-            color: white;
-        }
-        .btn-see-again:hover {
-            background-color: #218838;
-        }
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .success-message {
-            color: #28a745;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .error-message {
-            color: #dc3545;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .thank-you {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #d4edda;
-            border-radius: 6px;
-            color: #155724;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>📧 Newsletter Feedback</h1>
-            <p>Help us improve by sharing your thoughts on this week's content!</p>
+@extends('layouts.app')
+
+@section('content')
+<div class="feedback-page">
+    <h1 class="page-title">Feedback for Newsletter #{{ $newsletter->id }}</h1>
+
+    @if(session('success'))
+        <div class="alert-success">
+            {{ session('success') }}
         </div>
+    @endif
 
-        @php
-            $newsletter = \App\Models\Newsletter::find($newsletterId);
-            $curatedItems = collect($newsletter->curated_items ?? []);
-        @endphp
+    <form method="POST" action="{{ route('newsletter.feedback.submit') }}" class="feedback-form">
+        @csrf
 
-        @foreach($curatedItems as $item)
-            <div class="feedback-section" data-content-type="{{ strtolower($item['type']) }}" data-content-id="{{ $item['id'] }}">
-                @if($item['type'] === 'Native')
-                    @php
-                        $native = \App\Models\Native::find($item['id']);
-                    @endphp
-                    @if($native)
-                        <h3>📝 Native Content</h3>
-                        @if($native->type === 'text')
-                            <p>{{ Str::limit($native->content, 100) }}</p>
-                        @elseif($native->type === 'image')
-                            <p>🖼️ Image Content</p>
+        @foreach($curated as $item)
+            @php
+                $model = $item['model'];
+                $stats = $model->stats ?? new \App\Models\Stat;
+            @endphp
+
+            <div class="feedback-card">
+                {{-- Left column: Content --}}
+                <div class="feedback-content">
+                    <h3 class="content-title">{{ $item['type'] }}</h3>
+
+                    @if($item['type'] === 'Native')
+                        <p class="content-text">{{ $model->content }}</p>
+                        @if($model->image_url)
+                            <img src="{{ $model->image_url }}" alt="Native Content" class="content-image">
                         @endif
-                    @endif
+                        @if($model->url)
+                            <div class="mt-3">
+                                <a href="{{ $model->url }}" target="_blank" class="btn-link">Visit Link</a>
+                            </div>
+                        @endif
 
-                @elseif($item['type'] === 'Notion')
-                    @php
-                        $notion = \App\Models\NotionContent::find($item['id']);
-                    @endphp
-                    @if($notion)
-                        <h3>📖 {{ $notion->title }}</h3>
-                        <p>Notion page content</p>
-                    @endif
+                    @elseif($item['type'] === 'Notion')
+                        <a href="{{ $model->url }}" target="_blank" class="content-link">
+                            {{ $model->title }}
+                        </a>
 
-                @elseif($item['type'] === 'Pinterest')
-                    @php
-                        $pinterest = \App\Models\PinterestContent::find($item['id']);
-                    @endphp
-                    @if($pinterest)
-                        <h3>📌 Pinterest Pin</h3>
-                        <p>Pinterest inspiration content</p>
+                    @elseif($item['type'] === 'Pinterest')
+                        <iframe src="{{ $model->embed_code }}" height="336" width="236" frameborder="0" scrolling="no" class="content-embed"></iframe>
+                        <div class="mt-3">
+                            📌 <a href="{{ $model->pin_link }}" target="_blank" class="content-link">Go to Pin</a>
+                        </div>
                     @endif
-                @endif
-
-                <div class="feedback-actions">
-                    <button class="btn btn-like" onclick="submitFeedback('{{ strtolower($item['type']) }}', {{ $item['id'] }}, 'like', this)">
-                        ❤️ Like This
-                    </button>
-                    <button class="btn btn-see-again" onclick="submitFeedback('{{ strtolower($item['type']) }}', {{ $item['id'] }}, 'see_again', this)">
-                        🔄 See Again Soon
-                    </button>
                 </div>
-                
-                <div class="feedback-message"></div>
+
+                {{-- Right column: Feedback --}}
+                <div class="feedback-sidebar">
+                    <h4 class="sidebar-title">Your Feedback</h4>
+
+                    {{-- Like Button --}}
+                    <div class="mb-4">
+                        <button type="button"
+                                class="like-btn {{ ($stats->like_count ?? 0) > 0 ? 'liked' : '' }}"
+                                data-input-id="like-input-{{ $model->id }}">
+                            💗 <span>Like</span>
+                        </button>
+                        <input type="hidden"
+                               id="like-input-{{ $model->id }}"
+                               name="stats[{{ $item['type'] }}][{{ $model->id }}][like_count]"
+                               value="{{ $stats->like_count ?? 0 }}">
+                    </div>
+
+                    {{-- See Again --}}
+                    <div class="mb-4">
+                        <label class="see-again">
+                            <input type="checkbox"
+                                   name="stats[{{ $item['type'] }}][{{ $model->id }}][see_again_soon]"
+                                   value="1" {{ ($stats->see_again_soon ?? false) ? 'checked' : '' }}>
+                            <span>❓ See Again Soon</span>
+                        </label>
+                    </div>
+
+                    <input type="hidden"
+                           name="stats[{{ $item['type'] }}][{{ $model->id }}][stat_id]"
+                           value="{{ $stats->id }}">
+                </div>
             </div>
         @endforeach
 
-        <div class="thank-you" style="display: none;" id="thank-you-message">
-            <h3>🙏 Thank you!</h3>
-            <p>Your feedback helps us curate better content for you.</p>
+        <div class="form-footer">
+            <button type="submit" class="btn-submit">Submit Feedback</button>
         </div>
-    </div>
+    </form>
+</div>
 
-    <script>
-        let feedbackCount = 0;
-        const totalItems = {{ $curatedItems->count() }};
+{{-- Inline Script for Like Toggle --}}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".like-btn").forEach(button => {
+        button.addEventListener("click", () => {
+            const inputId = button.dataset.inputId;
+            const hiddenInput = document.getElementById(inputId);
+            const isLiked = hiddenInput.value > 0;
 
-        async function submitFeedback(contentType, contentId, action, button) {
-            const section = button.closest('.feedback-section');
-            const messageDiv = section.querySelector('.feedback-message');
-            
-            // Disable buttons
-            const buttons = section.querySelectorAll('.btn');
-            buttons.forEach(btn => btn.disabled = true);
-            
-            try {
-                const response = await fetch(`/newsletter-feedback/{{ $newsletterId }}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        content_type: contentType,
-                        content_id: contentId,
-                        action: action
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    messageDiv.innerHTML = '<div class="success-message">✅ ' + data.message + '</div>';
-                    feedbackCount++;
-                    
-                    // Show thank you message if all feedback is submitted
-                    if (feedbackCount >= totalItems) {
-                        document.getElementById('thank-you-message').style.display = 'block';
-                    }
-                } else {
-                    throw new Error(data.message);
-                }
-            } catch (error) {
-                messageDiv.innerHTML = '<div class="error-message">❌ ' + error.message + '</div>';
-                // Re-enable buttons on error
-                buttons.forEach(btn => btn.disabled = false);
+            if (isLiked) {
+                hiddenInput.value = 0;
+                button.classList.remove("liked");
+            } else {
+                hiddenInput.value = 1;
+                button.classList.add("liked");
             }
-        }
-    </script>
-</body>
-</html>
+        });
+    });
+});
+</script>
+
+{{-- Scoped styles --}}
+<style>
+.feedback-page {
+    width: 100%;
+    min-height: 100vh;
+    background: #f9fafb;
+    padding: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #1f2937;
+}
+
+.alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.feedback-card {
+    display: flex;
+    gap: 1.5rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: box-shadow 0.2s ease;
+}
+.feedback-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
+.feedback-content {
+    flex: 1;
+}
+.content-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #111827;
+}
+.content-text {
+    margin-bottom: 1rem;
+    color: #374151;
+}
+.content-image {
+    border-radius: 0.5rem;
+    max-height: 16rem;
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.content-link {
+    color: #2563eb;
+    text-decoration: underline;
+    font-size: 1.125rem;
+}
+.content-link:hover {
+    color: #1d4ed8;
+}
+.content-embed {
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.feedback-sidebar {
+    width: 16rem;
+    border-left: 1px solid #e5e7eb;
+    padding-left: 1.5rem;
+}
+.sidebar-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #374151;
+}
+
+.like-btn {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.like-btn:hover {
+    background: #e5e7eb;
+}
+.like-btn.liked {
+    background: #ec4899;
+    color: #fff;
+    border-color: #db2777;
+}
+
+.see-again {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: #374151;
+}
+
+.form-footer {
+    text-align: center;
+}
+.btn-submit {
+    background: #3b82f6;
+    color: #fff;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: background 0.2s ease;
+}
+.btn-submit:hover {
+    background: #2563eb;
+}
+.btn-link {
+    display: inline-block;
+    background: #3b82f6;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: background 0.2s ease;
+}
+.btn-link:hover {
+    background: #2563eb;
+}
+</style>
+@endsection

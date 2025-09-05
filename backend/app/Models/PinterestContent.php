@@ -42,6 +42,6 @@ class PinterestContent extends Model
 
     public function getEmbedCodeAttribute(): ?string
     {
-        return $this->pin_id ? " https://assets.pinterest.com/ext/embed.html?id={$this->pin_id}" : null;
+        return $this->pin_id ? "https://assets.pinterest.com/ext/embed.html?id={$this->pin_id}" : null;
     }
 }

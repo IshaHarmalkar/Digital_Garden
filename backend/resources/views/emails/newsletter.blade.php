@@ -51,40 +51,31 @@ Here's your curated review for the week:
 @endif
 
 ---
-
-{{--Native Items --}}
-
+{{-- Native Items --}}
 @forelse($items as $native)
 ---
 
-@if($native->type === 'text')
-
-{{ $native->content}}
+@if($native['type'] === 'text')
+{{ $native['content'] }}
 @endif
 
-@if($native->type === 'image')
-
-![Native image]({{ $native->image_url}})
+@if($native['type'] === 'image')
+![Native image]({{ $native['image_url'] }})
 @endif
 
-
-@if($native->url)
-
-<x-mail::button :url="$native->url">
-Visit Link
+@if($native['url'])
+<x-mail::button :url="$native['url']">
+    Visit Link
 </x-mail::button>
 @endif
 
-💗Likes: {{ $native->stats->like_count ?? 0}}
-❓See Again: {{ $native->stats->see_again_soon ? 'Yes' : 'No'}}
-
-{{-- feedback links --}}
-
-
+💗 Likes: {{ $native['like_count'] ?? 0 }}
+❓ See Again: {{ $native['see_again_soon'] ? 'Yes' : 'No' }}
 
 @empty
-_No new posts this week.
+_No native items this week._
 @endforelse
+
 
 ---
 

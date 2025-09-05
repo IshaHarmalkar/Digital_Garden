@@ -150,6 +150,7 @@ class WeeklyNewsletterMail extends Mailable
 
             return [
                 'id' => $content->id,
+                'stat_id' => $content->stats->id ?? null,
                 'title' => $content->title,
                 'url' => $page->getUrl(),
                 'like_count' => $content->stats->like_count ?? 0,
@@ -160,15 +161,23 @@ class WeeklyNewsletterMail extends Mailable
 
     private function mapNativeItems($nativeItems)
     {
-
         return $nativeItems->map(function ($item) {
-
             $native = Native::with('stats')->find($item['id']);
+            if (! $native) {
+                return null;
+            }
 
-            return $native;
-
-        });
-
+            return [
+                'id' => $native->id,
+                'stat_id' => $native->stats->id ?? null,
+                'type' => $native->type,
+                'content' => $native->content,
+                'image_url' => $native->image_url,
+                'url' => $native->url,
+                'like_count' => $native->stats->like_count ?? 0,
+                'see_again_soon' => $native->stats->see_again_soon ?? false,
+            ];
+        })->filter();
     }
 
     private function mapPinterestPins($pinterestItems)
@@ -181,6 +190,7 @@ class WeeklyNewsletterMail extends Mailable
 
             return [
                 'id' => $pin->id,
+                'stat_id' => $pin->stats->id ?? null,
                 'pin_id' => $pin->pin_id,
                 'board_id' => $pin->board_id,
                 'link' => $pin->pin_link,
