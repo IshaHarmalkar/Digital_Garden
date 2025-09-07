@@ -11,25 +11,14 @@
     <!-- Drawer -->
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item clickable v-ripple to="/log">
+        <q-item v-for="link in links" :key="link.title" clickable v-ripple :to="link.link">
           <q-item-section avatar>
-            <q-icon name="edit" />
+            <q-icon :name="link.icon" />
           </q-item-section>
-          <q-item-section>Log Mood</q-item-section>
-        </q-item>
-
-        <q-item clickable v-ripple to="/today">
-          <q-item-section avatar>
-            <q-icon name="today" />
+          <q-item-section>
+            <q-item-label>{{ link.title }}</q-item-label>
+            <q-item-label caption>{{ link.caption }}</q-item-label>
           </q-item-section>
-          <q-item-section>Today</q-item-section>
-        </q-item>
-
-        <q-item clickable v-ripple to="/summary">
-          <q-item-section avatar>
-            <q-icon name="bar_chart" />
-          </q-item-section>
-          <q-item-section>Summary</q-item-section>
         </q-item>
       </q-list>
     </q-drawer>
@@ -47,6 +36,38 @@ export default {
   data() {
     return {
       leftDrawerOpen: false,
+      links: [
+        {
+          title: 'Home',
+          caption: 'Dashboard',
+          icon: 'home',
+          link: '/home',
+        },
+        {
+          title: 'Log Mood',
+          caption: 'Track your mood',
+          icon: 'edit',
+          link: '/log',
+        },
+        {
+          title: 'Reflect',
+          caption: 'Journal & Gratitude',
+          icon: 'menu_book',
+          link: '/reflect',
+        },
+        {
+          title: 'Today',
+          caption: 'Daily overview',
+          icon: 'today',
+          link: '/today',
+        },
+        {
+          title: 'Summary',
+          caption: 'Trends & Reports',
+          icon: 'bar_chart',
+          link: '/summary',
+        },
+      ],
     }
   },
 }

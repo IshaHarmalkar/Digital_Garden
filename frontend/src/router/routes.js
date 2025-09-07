@@ -4,7 +4,10 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', redirect: '/log' }, // default route
+      { path: 'home', component: () => import('pages/DashBoard.vue') },
       { path: 'log', component: () => import('pages/MoodLogPage.vue') },
+      { path: 'reflect', component: () => import('pages/ReflectionPage.vue') },
+
       // { path: 'today', component: () => import('pages/TodayPage.vue') },
       // { path: 'summary', component: () => import('pages/SummaryPage.vue') },
     ],
