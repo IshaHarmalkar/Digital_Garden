@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\MoodEntryController;
 use App\Http\Controllers\NativeController;
+use App\Http\Controllers\ReflectionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,8 @@ Route::get('moods', [MoodEntryController::class, 'moods']);
 Route::post('mood-entries', [MoodEntryController::class, 'store']);
 Route::get('mood-entries/today', [MoodEntryController::class, 'today']);
 Route::get('mood-entries/summary', [MoodEntryController::class, 'summary']);
+Route::get('mood-entries/{date}', [MoodEntryController::class, 'show']);
+Route::get('mood-entries-trends', [MoodEntryController::class, 'trends']);
 
 // Protected routes group
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -28,3 +31,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('comments', CommentController::class)
         ->only(['store', 'update', 'destroy']);
 });
+
+Route::post('reflections/', [ReflectionController::class, 'store']);          // Save or update reflection
+Route::get('reflections/today', [ReflectionController::class, 'today']);      // Get today’s reflection
+Route::get('reflections/summary', [ReflectionController::class, 'summary']);  // Get summary for week/month/quarter
+Route::get('reflections/{date}', [ReflectionController::class, 'show']);      // Get reflection by specific date
