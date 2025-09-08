@@ -12,10 +12,10 @@ Route::get('moods/tree', [MoodEntryController::class, 'moodTree']);
 
 Route::get('moods', [MoodEntryController::class, 'moods']);
 Route::post('mood-entries', [MoodEntryController::class, 'store']);
-Route::get('mood-entries/today', [MoodEntryController::class, 'today']);
-Route::get('mood-entries/summary', [MoodEntryController::class, 'summary']);
-Route::get('mood-entries/{date}', [MoodEntryController::class, 'show']);
-Route::get('mood-entries-trends', [MoodEntryController::class, 'trends']);
+Route::get('/mood-entries/range', [MoodEntryController::class, 'entriesByRange']);
+Route::get('/mood-entries/range-primary', [MoodEntryController::class, 'entriesPrimaryByRange']);
+
+Route::get('/mood-entries/all', [MoodEntryController::class, 'index']);
 
 // Protected routes group
 Route::middleware(['auth:sanctum'])->group(function () {

@@ -35,6 +35,57 @@ class MoodEntryController extends Controller
         return response()->json($tree);
     }
 
+    // get all mood entries
+    public function index()
+    {
+        return MoodEntry::with('mood')->get();
+    }
+
+    // get mood entries for a period
+    public function entriesByRange(Request $request)
+    {
+        $validated = $request->validate([
+            'start' => 'required|date',
+            'end' => 'required|date|after_or_equal:start',
+        ]);
+
+        return MoodEntry::with('mood')
+            ->forDateRange($validated['start'], $validated['end'])
+            ->orderBy('entry_date')
+            ->orderBy('slot')
+            ->get();
+    }
+
+    public function entriesPrimaryByRange(Request $request)
+    {
+        $validated = $request->validate([
+            'start' => 'required|date',
+            'end' => 'required|date|after_or_equal:start',
+        ]);
+
+        $entries = MoodEntry::with('mood:id,primary') // only load needed mood field
+            ->forDateRange($validated['start'], $validated['end'])
+            ->orderBy('entry_date')
+            ->orderBy('slot')
+            ->get(['id', 'mood_id', 'slot', 'entry_date']);
+
+        $grouped = $entries->groupBy(function ($entry) {
+            return $entry->entry_date->toDateString();
+        });
+
+        $result = $grouped->map(function ($dayEntries, $date) {
+            return collect(['morning', 'afternoon', 'night'])->mapWithKeys(function ($slot) use ($dayEntries) {
+                $entry = $dayEntries->firstWhere('slot', $slot);
+
+                return [
+                    $slot => $entry ? $entry->mood?->primary : null,
+                ];
+            });
+        });
+
+        return response()->json($result);
+    }
+
     // log a mood request
     public function store(Request $request)
     {
@@ -59,103 +110,5 @@ class MoodEntryController extends Controller
 
         return response()->json($entry, 201);
 
-    }
-
-    // / get today's entries with all slots represented
-    public function today()
-    {
-        $today = now()->toDateString();
-
-        // Use scope and get only what we need
-        $entries = MoodEntry::forDate($today)
-            ->with('mood:id,primary,secondary,tertiary') // Only load needed mood fields
-            ->get()
-            ->keyBy('slot');
-
-        // Create response with all slots represented
-        $slots = ['morning', 'afternoon', 'night'];
-
-        $result = collect($slots)->mapWithKeys(function ($slot) use ($entries) {
-            return [$slot => $entries->get($slot, [
-                'slot' => $slot,
-                'mood' => null,
-                'entry_date' => now()->toDateString(),
-            ])];
-        });
-
-        return response()->json($result);
-    }
-
-    public function summary(Request $request)
-    {
-        $range = $request->get('range', 'week');
-        $end = now()->toDateString();
-
-        $start = match ($range) {
-            'month' => now()->startOfMonth()->toDateString(),
-            'quarter' => now()->firstOfQuarter()->toDateString(),
-            default => now()->startOfWeek()->toDateString(),
-        };
-
-        // Use database grouping for better performance
-        $summary = MoodEntry::forDateRange($start, $end)
-            ->join('moods', 'mood_entries.mood_id', '=', 'moods.id')
-            ->select('moods.primary')
-            ->selectRaw('COUNT(*) as count')
-            ->groupBy('moods.primary')
-            ->pluck('count', 'primary');
-
-        // Also get total entries and coverage stats
-        $totalEntries = MoodEntry::forDateRange($start, $end)->count();
-        $totalPossibleEntries = now()->parse($start)->diffInDays(now()->parse($end)) * 3; // 3 slots per day
-
-        return response()->json([
-            'summary' => $summary,
-            'stats' => [
-                'total_entries' => $totalEntries,
-                'total_possible' => $totalPossibleEntries,
-                'completion_rate' => $totalPossibleEntries > 0 ? round(($totalEntries / $totalPossibleEntries) * 100, 1) : 0,
-            ],
-            'date_range' => ['start' => $start, 'end' => $end],
-        ]);
-    }
-
-    // specific date mood entries
-    public function show($date)
-    {
-        $entries = MoodEntry::forDate($date)
-            ->with('mood:id,primary,secondary,tertiary')
-            ->get()
-            ->keyBy('slot');
-
-        $slots = ['morning', 'afternoon', 'night'];
-
-        $result = collect($slots)->mapWithKeys(function ($slot) use ($entries, $date) {
-            return [$slot => $entries->get($slot, [
-                'slot' => $slot,
-                'mood' => null,
-                'entry_date' => $date,
-            ])];
-        });
-
-        return response()->json($result);
-    }
-
-    // mood trends over time
-    public function trends(Request $request)
-    {
-        $days = $request->get('days', 7); // Default 7 days
-        $endDate = now()->toDateString();
-        $startDate = now()->subDays($days)->toDateString();
-
-        $trends = MoodEntry::forDateRange($startDate, $endDate)
-            ->join('moods', 'mood_entries.mood_id', '=', 'moods.id')
-            ->select('mood_entries.entry_date', 'mood_entries.slot', 'moods.primary')
-            ->orderBy('mood_entries.entry_date')
-            ->orderByRaw("FIELD(mood_entries.slot, 'morning', 'afternoon', 'night')")
-            ->get()
-            ->groupBy('entry_date');
-
-        return response()->json($trends);
     }
 }
