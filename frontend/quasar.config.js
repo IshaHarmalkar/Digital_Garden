@@ -74,6 +74,8 @@ export default defineConfig((/* ctx */) => {
     devServer: {
       // https: true,
       open: true, // opens browser window automatically
+      port: 9000, //added for live cahnges to reflext
+      hot: true, // enable hot module replacement
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework

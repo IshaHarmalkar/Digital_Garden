@@ -56,6 +56,12 @@ export default {
           link: '/reflect',
         },
         {
+          title: 'Calendar',
+          caption: 'Calendar View',
+          icon: 'time',
+          link: '/calendar',
+        },
+        {
           title: 'Today',
           caption: 'Daily overview',
           icon: 'today',

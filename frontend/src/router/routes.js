@@ -7,6 +7,7 @@ const routes = [
       { path: 'home', component: () => import('pages/DashBoard.vue') },
       { path: 'log', component: () => import('pages/MoodLogPage.vue') },
       { path: 'reflect', component: () => import('pages/ReflectionPage.vue') },
+      { path: 'calendar', component: () => import('pages/CalendarPage.vue') },
 
       // { path: 'today', component: () => import('pages/TodayPage.vue') },
       // { path: 'summary', component: () => import('pages/SummaryPage.vue') },
