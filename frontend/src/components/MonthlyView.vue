@@ -1,11 +1,29 @@
 <template>
-  <div class="q-gutter-md row wrap">
-    <DayCard
-      v-for="dayObj in monthDays"
-      :key="dayObj.date"
-      :day="new Date(dayObj.date).getDate()"
-      :moods="dayObj.moods"
-    />
+  <div class="monthly-view">
+    <!-- Month Header -->
+    <div class="month-header q-mb-md">
+      <h4 class="text-center q-my-sm">{{ monthName }}</h4>
+    </div>
+
+    <!-- Days of Week Header -->
+    <div class="days-header row q-mb-xs">
+      <div
+        v-for="day in daysOfWeek"
+        :key="day"
+        class="day-header col text-center text-weight-medium text-grey-7"
+      >
+        {{ day }}
+      </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="calendar-grid">
+      <div v-for="week in weeks" :key="week.weekIndex" class="week-row row q-gutter-xs q-mb-xs">
+        <div v-for="day in week.days" :key="day.key" class="day-container col">
+          <DayCard :day="day.dayNumber" :moods="day.moods" :blank="day.isBlank" />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -14,114 +32,168 @@ import DayCard from './DayCard.vue'
 
 export default {
   name: 'MonthlyView',
-  components: { DayCard },
+  components: {
+    DayCard,
+  },
 
-  computed: {
-    monthDays() {
-      const dates = []
-      const monthData = this.month
-      const firstDate = new Date(Object.keys(this.month)[0])
-
-      const year = firstDate.getFullYear()
-      const month = firstDate.getMonth()
-
-      //get number of days in month
-      const daysInMonth = new Date(year, month + 1, 0).getDate()
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-        dates.push({
-          date: dateStr,
-          moods: monthData[dateStr] ? Object.values(monthData[dateStr]) : [],
-        })
-      }
-
-      return dates
+  props: {
+    monthlyData: {
+      type: Object,
+      default: () => ({
+        year: new Date().getFullYear(),
+        month: new Date().getMonth(), // 0-based (0 = January)
+        days: [], // Array of objects with day number and moods
+      }),
     },
   },
 
   data() {
     return {
-      month: {
-        '2025-08-01': {
-          morning: 'Surprise',
-          afternoon: 'Surprise',
-          night: 'Fear',
-        },
-        '2025-08-02': {
-          morning: 'Sad',
-          afternoon: 'Sad',
-          night: 'Anger',
-        },
-        '2025-08-03': {
-          morning: 'Surprise',
-          afternoon: 'Sad',
-          night: 'Sad',
-        },
-        '2025-08-04': {
-          morning: 'Happy',
-          afternoon: 'Sad',
-          night: 'Disgust',
-        },
-        '2025-08-05': {
-          morning: 'Happy',
-          afternoon: 'Sad',
-          night: 'Happy',
-        },
-        '2025-08-06': {
-          morning: 'Anger',
-          afternoon: 'Disgust',
-          night: 'Sad',
-        },
-        '2025-08-07': {
-          morning: 'Sad',
-          afternoon: 'Disgust',
-          night: 'Sad',
-        },
-        '2025-08-08': {
-          morning: 'Fear',
-          afternoon: 'Happy',
-          night: 'Anger',
-        },
-        '2025-08-09': {
-          morning: 'Happy',
-          afternoon: 'Happy',
-          night: 'Sad',
-        },
-        '2025-08-10': {
-          morning: 'Anger',
-          afternoon: 'Fear',
-          night: 'Sad',
-        },
-        '2025-08-11': {
-          morning: 'Sad',
-          afternoon: 'Sad',
-          night: 'Sad',
-        },
-        '2025-08-12': {
-          morning: 'Surprise',
-          afternoon: 'Anger',
-          night: 'Sad',
-        },
-        '2025-08-13': {
-          morning: 'Fear',
-          afternoon: 'Anger',
-          night: 'Disgust',
-        },
-        '2025-08-14': {
-          morning: 'Happy',
-          afternoon: 'Fear',
-          night: 'Sad',
-        },
-        '2025-08-15': {
-          morning: 'Disgust',
-          afternoon: 'Sad',
-          night: 'Happy',
-        },
-      },
+      daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     }
+  },
+
+  computed: {
+    monthName() {
+      const date = new Date(this.monthlyData.year, this.monthlyData.month)
+      return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    },
+
+    firstDayOfMonth() {
+      return new Date(this.monthlyData.year, this.monthlyData.month, 1)
+    },
+
+    lastDayOfMonth() {
+      return new Date(this.monthlyData.year, this.monthlyData.month + 1, 0)
+    },
+
+    // Get the day of week for first day (0=Sunday, 1=Monday, etc.)
+    // Convert to Monday=0, Tuesday=1, etc.
+    firstDayWeekday() {
+      const day = this.firstDayOfMonth.getDay()
+      return day === 0 ? 6 : day - 1 // Convert Sunday (0) to 6, Monday (1) to 0, etc.
+    },
+
+    daysInMonth() {
+      return this.lastDayOfMonth.getDate()
+    },
+
+    weeks() {
+      const weeks = []
+      let currentWeek = []
+      let dayCounter = 1
+
+      // First week - add blank days before month starts
+      for (let i = 0; i < this.firstDayWeekday; i++) {
+        currentWeek.push({
+          key: `blank-${i}`,
+          dayNumber: null,
+          moods: [],
+          isBlank: true,
+        })
+      }
+
+      // Add days of the month
+      while (dayCounter <= this.daysInMonth) {
+        // Find data for current day
+        const dayData = this.monthlyData.days.find((d) => d.day === dayCounter) || {}
+
+        currentWeek.push({
+          key: `day-${dayCounter}`,
+          dayNumber: dayCounter,
+          moods: dayData.moods || [],
+          isBlank: false,
+        })
+
+        // If we've filled a week (7 days), start a new week
+        if (currentWeek.length === 7) {
+          weeks.push({
+            weekIndex: weeks.length,
+            days: [...currentWeek],
+          })
+          currentWeek = []
+        }
+
+        dayCounter++
+      }
+
+      // Fill remaining days in last week with blanks
+      while (currentWeek.length > 0 && currentWeek.length < 7) {
+        currentWeek.push({
+          key: `blank-end-${currentWeek.length}`,
+          dayNumber: null,
+          moods: [],
+          isBlank: true,
+        })
+      }
+
+      // Add the last week if it has any days
+      if (currentWeek.length > 0) {
+        weeks.push({
+          weekIndex: weeks.length,
+          days: currentWeek,
+        })
+      }
+
+      return weeks
+    },
   },
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.monthly-view {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.month-header h4 {
+  margin: 0;
+  font-weight: 500;
+}
+
+.days-header {
+  padding: 0 4px;
+}
+
+.day-header {
+  font-size: 0.9rem;
+  padding: 8px 0;
+}
+
+.calendar-grid {
+  width: 100%;
+}
+
+.week-row {
+  width: 100%;
+}
+
+.day-container {
+  flex: 1;
+  min-width: 0; /* Important for flex items to shrink properly */
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .day-header {
+    font-size: 0.8rem;
+    padding: 4px 0;
+  }
+
+  .month-header h4 {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .days-of-week {
+    font-size: 0.7rem;
+  }
+
+  .month-header h4 {
+    font-size: 1rem;
+  }
+}
+</style>
