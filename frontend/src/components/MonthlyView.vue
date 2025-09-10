@@ -1,16 +1,16 @@
 <template>
   <div class="monthly-view">
     <!-- Month Header -->
-    <div class="month-header q-mb-md">
-      <h4 class="text-center q-my-sm">{{ monthName }}</h4>
+    <div class="month-header q-pa-md">
+      <h4 class="text-center">{{ monthName }}</h4>
     </div>
 
     <!-- Days of Week Header -->
-    <div class="days-header row q-mb-xs">
+    <div class="days-header row">
       <div
         v-for="day in daysOfWeek"
         :key="day"
-        class="day-header col text-center text-weight-medium text-grey-7"
+        class="day-header col text-center text-weight-medium text-grey-7 q-pa-sm"
       >
         {{ day }}
       </div>
@@ -18,7 +18,7 @@
 
     <!-- Calendar Grid -->
     <div class="calendar-grid">
-      <div v-for="week in weeks" :key="week.weekIndex" class="week-row row q-gutter-xs q-mb-xs">
+      <div v-for="week in weeks" :key="week.weekIndex" class="week-row row">
         <div v-for="day in week.days" :key="day.key" class="day-container col">
           <DayCard :day="day.dayNumber" :moods="day.moods" :blank="day.isBlank" />
         </div>
@@ -154,12 +154,14 @@ export default {
 }
 
 .days-header {
-  padding: 0 4px;
+  // padding: 0 4px;
+  background-color: #eff3ff;
 }
 
 .day-header {
   font-size: 0.9rem;
-  padding: 8px 0;
+  //padding: 8px 0;
+  border: solid 1px #885df1;
 }
 
 .calendar-grid {
@@ -175,25 +177,12 @@ export default {
   min-width: 0; /* Important for flex items to shrink properly */
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .day-header {
-    font-size: 0.8rem;
-    padding: 4px 0;
-  }
-
-  .month-header h4 {
-    font-size: 1.2rem;
-  }
+.border {
+  border: solid 1px grey;
 }
 
-@media (max-width: 400px) {
-  .days-of-week {
-    font-size: 0.7rem;
-  }
-
-  .month-header h4 {
-    font-size: 1rem;
-  }
+.test-2 {
+  border: 1px solid red;
+  background-color: #885df1;
 }
 </style>

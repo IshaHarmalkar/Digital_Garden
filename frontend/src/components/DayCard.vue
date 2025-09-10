@@ -1,9 +1,9 @@
 <template>
-  <div>
-    <q-card square class="day-card flex q-pa-sm" :style="{ backgroundColor: 'white' }">
-      <div class="day-content column q-pa-xs">
+  <div class="">
+    <q-card square class="day-card flex" :style="{ backgroundColor: 'white' }">
+      <div class="day-content column">
         <template v-if="!blank">
-          <div class="row justify-end text-grey">{{ formattedDay }}</div>
+          <div class="row justify-end text-grey q-pa-sm">{{ formattedDay }}</div>
 
           <div class="row justify-items">
             <q-chip
@@ -91,7 +91,7 @@ export default {
   width: 100%;
   aspect-ratio: 1 / 1; /* makes it a square */
   min-width: 60px; /* optional minimum size */
-  max-width: 120px; /* optional max size */
+  //max-width: 120px; /* optional max size */
   background-color: whitesmoke;
 }
 
@@ -106,10 +106,13 @@ export default {
 
 .mood-chip {
   font-size: 0.7rem;
-  padding: 10px;
 }
 
 .day-card.blank {
   background-color: #f5f5f5; /* lighter grey for blank */
+}
+
+.test-class-1 {
+  border: 1px solid yellow;
 }
 </style>

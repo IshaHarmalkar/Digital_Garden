@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-center q-pa-md q-ma-md">
+  <div class="flex flex-center">
     <MonthlyView :monthlyData="processedMonthlyData" />
   </div>
 </template>
@@ -216,4 +216,8 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.test-class {
+  border: solid 1px red;
+}
+</style>
