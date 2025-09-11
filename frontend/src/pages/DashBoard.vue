@@ -6,11 +6,13 @@
         be <span class="fancy-cursive text-h2"> good</span>
       </div>
     </div>
-    <div class="row">
-      <div class="col-8 q-ma-md">
-        <div><calendar-component /></div>
+    <div class="row" style="height: 100%">
+      <div class="col-8 q-ma-md" style="display: flex; flex-direction: column">
+        <calendar-component style="flex: 1" />
       </div>
-      <div class="col q-ma-md"><gratitude-list /></div>
+      <div class="col q-ma-md" style="display: flex; flex-direction: column">
+        <gratitude-list style="flex: 1" />
+      </div>
     </div>
   </q-page>
 </template>

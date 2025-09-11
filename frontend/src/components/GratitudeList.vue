@@ -1,5 +1,5 @@
 <template>
-  <div class="border">
+  <div class="">
     <div><q-btn label="Gratitude List" color="primary" class="full-width" /></div>
     <div class="list-content">
       <q-list bordered separator class="scroll-list">
@@ -53,7 +53,7 @@ export default {
 }
 
 .list-content {
-  height: 400px;
+  flex: 1;
   overflow: hidden;
   position: relative;
 }
@@ -62,11 +62,12 @@ export default {
   display: flex;
   flex-direction: column;
   animation: scrollUp linear 10s infinite;
+  height: 100%;
 }
 
 @keyframes scrollUp {
   0% {
-    transform: translateY();
+    transform: translateY(0);
   }
 
   100% {

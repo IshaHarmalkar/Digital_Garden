@@ -1,215 +1,108 @@
 <template>
-  <div class="calendar-container">
-    <!-- Calendar Header -->
-    <div class="calendar-header q-pa-md">
-      <q-btn flat round icon="chevron_left" @click="previousMonth" color="primary" />
-      <div class="text-h5 text-weight-medium">
-        {{ currentMonthYear }}
+  <div class="flex flex-center column border">
+    <div class="row items-center justify-start header-container">
+      <div class="month-header q-ma-sm">
+        <h4 class="">{{ currentYear }} {{ currentMonthName }}</h4>
       </div>
-      <q-btn flat round icon="chevron_right" @click="nextMonth" color="primary" />
+
+      <q-btn label="Previous" @click="changeMonth(-1)" class="q-mr-md" />
+      <q-btn label="Next" @click="changeMonth(1)" lass="q-mr-md" />
     </div>
 
-    <!-- Days of Week Header -->
-    <div class="days-header row">
-      <div
-        v-for="day in daysOfWeek"
-        :key="day"
-        class="col text-center q-pa-sm text-weight-medium text-grey-7"
-      >
-        {{ day }}
-      </div>
-    </div>
-
-    <!-- Calendar Grid -->
-    <div class="calendar-grid">
-      <div v-for="week in calendarWeeks" :key="week[0]?.date || 'empty'" class="row">
-        <div v-for="day in week" :key="day?.date || Math.random()" class="col calendar-cell">
-          <DayCard
-            v-if="day"
-            :date="day.date"
-            :day-number="day.dayNumber"
-            :is-current-month="day.isCurrentMonth"
-            :is-today="day.isToday"
-            :events="day.events"
-            :tasks="day.tasks"
-            :notes="day.notes"
-            @click="onDayClick"
-          />
-        </div>
-      </div>
-    </div>
+    <MonthlyView :monthlyData="processedMonthlyData" />
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
-
-import DayCard from './DayCard.vue'
+import MonthlyView from 'src/components/MonthlyView.vue'
 
 export default {
-  name: 'CalendarComponent',
-  components: {
-    DayCard,
+  name: 'CalendarPage',
+  components: { MonthlyView },
+
+  data() {
+    const now = new Date()
+    return {
+      currentYear: now.getFullYear(),
+      currentMonth: now.getMonth(), // 0-based
+      moodData: {},
+    }
   },
-  setup() {
-    const currentDate = ref(new Date())
-    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-    // Sample data - in real app this would come from props or API
-    const sampleData = ref({
-      '2024-01-15': {
-        events: ['Meeting', 'Lunch'],
-        tasks: ['Review code', 'Update docs'],
-        notes: ['Important call'],
-      },
-      '2024-01-20': {
-        events: ['Conference'],
-        tasks: ['Prepare presentation'],
-        notes: [],
-      },
-      '2024-01-25': {
-        events: ['Team sync'],
-        tasks: ['Code review', 'Testing'],
-        notes: ['Follow up needed'],
-      },
-    })
+  computed: {
+    processedMonthlyData() {
+      const days = Object.entries(this.moodData).map(([dateString, dayMoods]) => ({
+        day: new Date(dateString).getDate(),
+        moods: [...new Set(Object.values(dayMoods))],
+      }))
 
-    const currentMonthYear = computed(() => {
-      return currentDate.value.toLocaleDateString('en-US', {
+      return {
+        year: this.currentYear,
+        month: this.currentMonth,
+        days,
+      }
+    },
+
+    currentMonthName() {
+      return new Date(this.currentYear, this.currentMonth).toLocaleString('deadult', {
         month: 'long',
-        year: 'numeric',
       })
-    })
+    },
+  },
 
-    const calendarWeeks = computed(() => {
-      const year = currentDate.value.getFullYear()
-      const month = currentDate.value.getMonth()
+  watch: {
+    currentMonth: 'fetchMonthData',
+    currentYear: 'fetchMonthData',
+  },
 
-      // First day of the month
-      const firstDay = new Date(year, month, 1)
-      const lastDay = new Date(year, month + 1, 0)
+  mounted() {
+    this.fetchMonthData()
+  },
 
-      // Start from the beginning of the week containing the first day
-      const startDate = new Date(firstDay)
-      startDate.setDate(startDate.getDate() - firstDay.getDay())
+  methods: {
+    changeMonth(delta) {
+      let newMonth = this.currentMonth + delta
+      let newYear = this.currentYear
 
-      const weeks = []
-      let currentWeek = []
-      let date = new Date(startDate)
-
-      // Generate 6 weeks to ensure full calendar view
-      for (let i = 0; i < 42; i++) {
-        const dayData = {
-          date: new Date(date),
-          dayNumber: date.getDate(),
-          isCurrentMonth: date.getMonth() === month,
-          isToday: isToday(date),
-          events: [],
-          tasks: [],
-          notes: [],
-        }
-
-        // Add sample data if exists
-        const dateKey = formatDateKey(date)
-        if (sampleData.value[dateKey]) {
-          dayData.events = sampleData.value[dateKey].events || []
-          dayData.tasks = sampleData.value[dateKey].tasks || []
-          dayData.notes = sampleData.value[dateKey].notes || []
-          console.log(lastDay)
-        }
-
-        currentWeek.push(dayData)
-
-        if (currentWeek.length === 7) {
-          weeks.push(currentWeek)
-          currentWeek = []
-        }
-
-        date.setDate(date.getDate() + 1)
+      if (newMonth < 0) {
+        newMonth = 11
+        newYear--
+      } else if (newMonth > 11) {
+        newMonth = 0
+        newYear++
       }
 
-      return weeks
-    })
+      this.currentMonth = newMonth
+      this.currentYear = newYear
+    },
 
-    const isToday = (date) => {
-      const today = new Date()
-      return date.toDateString() === today.toDateString()
-    }
+    async fetchMonthData() {
+      const start = new Date(this.currentYear, this.currentMonth, 1)
+      const end = new Date(this.currentYear, this.currentMonth + 1, 0)
 
-    const formatDateKey = (date) => {
-      return date.toISOString().split('T')[0]
-    }
+      const startStr = start.toISOString().split('T')[0]
+      const endStr = end.toISOString().split('T')[0]
 
-    const previousMonth = () => {
-      currentDate.value = new Date(
-        currentDate.value.getFullYear(),
-        currentDate.value.getMonth() - 1,
-        1,
-      )
-    }
-
-    const nextMonth = () => {
-      currentDate.value = new Date(
-        currentDate.value.getFullYear(),
-        currentDate.value.getMonth() + 1,
-        1,
-      )
-    }
-
-    const onDayClick = (dayData) => {
-      console.log('Day clicked:', dayData)
-      // Handle day click - could emit event or open modal
-    }
-
-    onMounted(() => {
-      // Initialize with current date
-      currentDate.value = new Date()
-    })
-
-    return {
-      currentDate,
-      daysOfWeek,
-      currentMonthYear,
-      calendarWeeks,
-      previousMonth,
-      nextMonth,
-      onDayClick,
-    }
+      try {
+        const { data } = await this.$api.get(
+          `/mood-entries/range-primary?start=${startStr}&end=${endStr}`,
+        )
+        this.moodData = data
+      } catch (err) {
+        console.error('Failed to fetch mood data:', err)
+        this.moodData = {}
+      }
+    },
   },
 }
 </script>
 
-<style scoped>
-.calendar-container {
-  max-width: 100%;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+<style>
+.border {
+  border: 1px solid green;
 }
-
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.days-header {
-  border-bottom: 1px solid #e0e0e0;
-  background: #f5f5f5;
-}
-
-.calendar-grid {
-  min-height: 600px;
-}
-
-.calendar-cell {
-  min-height: 100px;
-  border-right: 1px solid #e0e0e0;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.calendar-cell:last-child {
-  border-right: none;
+.month-header h4 {
+  margin: 0;
+  font-weight: 500;
 }
 </style>

@@ -1,9 +1,9 @@
 <template>
   <div class="monthly-view">
     <!-- Month Header -->
-    <div class="month-header q-pa-md">
+    <!-- <div class="month-header q-pa-md">
       <h4 class="text-center">{{ monthName }}</h4>
-    </div>
+    </div> -->
 
     <!-- Days of Week Header -->
     <div class="days-header row">
