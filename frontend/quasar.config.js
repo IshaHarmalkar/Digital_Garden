@@ -68,6 +68,10 @@ export default defineConfig((/* ctx */) => {
           { server: false },
         ],
       ],
+
+      html: {
+        link: [],
+      },
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver

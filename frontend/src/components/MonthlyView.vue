@@ -162,6 +162,7 @@ export default {
   font-size: 0.9rem;
   //padding: 8px 0;
   border: solid 1px #885df1;
+  margin: 2px 2px;
 }
 
 .calendar-grid {
@@ -175,6 +176,7 @@ export default {
 .day-container {
   flex: 1;
   min-width: 0; /* Important for flex items to shrink properly */
+  margin: 2px 2px;
 }
 
 .border {

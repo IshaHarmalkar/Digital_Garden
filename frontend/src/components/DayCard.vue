@@ -1,9 +1,9 @@
 <template>
   <div class="">
-    <q-card square class="day-card flex" :style="{ backgroundColor: 'white' }">
+    <q-card square class="day-card flex q-pa-sm" :style="{ backgroundColor: 'white' }">
       <div class="day-content column">
         <template v-if="!blank">
-          <div class="row justify-end text-grey q-pa-sm">{{ formattedDay }}</div>
+          <div class="row justify-end text-grey">{{ formattedDay }}</div>
 
           <div class="row justify-items">
             <q-chip
