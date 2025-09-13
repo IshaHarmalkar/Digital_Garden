@@ -1,6 +1,13 @@
 <template>
   <div class="">
-    <div><q-btn label="Gratitude List" color="primary" class="full-width" /></div>
+    <div>
+      <q-btn
+        unelevated
+        label="Gratitude List"
+        color="primary"
+        class="full-width q-mb-md primary-rounded-btn q-pa-md"
+      />
+    </div>
     <div class="list-content">
       <q-list bordered separator class="scroll-list">
         <div class="scroll-wrapper">
@@ -62,7 +69,11 @@ export default {
   display: flex;
   flex-direction: column;
   animation: scrollUp linear 10s infinite;
-  height: 100%;
+  height: 400px;
+}
+
+.primary-rounded-btn {
+  border-radius: 15px;
 }
 
 @keyframes scrollUp {

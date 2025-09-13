@@ -8,7 +8,12 @@ const routes = [
       { path: 'log', component: () => import('pages/MoodLogPage.vue') },
       { path: 'reflect', component: () => import('pages/ReflectionPage.vue') },
       { path: 'calendar', component: () => import('pages/CalendarPage.vue') },
-
+      { path: 'feedback', component: () => import('pages/FeedbackPage.vue') },
+      {
+        path: '/newsletter/:id/feedback',
+        component: () => import('pages/FeedbackPage.vue'),
+        name: 'newsletter-feedback',
+      },
       // { path: 'today', component: () => import('pages/TodayPage.vue') },
       // { path: 'summary', component: () => import('pages/SummaryPage.vue') },
     ],

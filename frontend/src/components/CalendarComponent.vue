@@ -1,14 +1,13 @@
 <template>
-  <div class="flex flex-center column border">
-    <div class="row items-center justify-start header-container">
+  <div class="flex column">
+    <div class="row items-center justify-start q-pa-none">
       <div class="month-header q-ma-sm">
-        <h4 class="">{{ currentYear }} {{ currentMonthName }}</h4>
+        <div class="text-h6 text-bold">{{ currentMonthName }} {{ currentYear }}</div>
       </div>
+      <q-btn round icon="chevron_left" @click="changeMonth(-1)" class="q-mr-md cal-btn" />
 
-      <q-btn label="Previous" @click="changeMonth(-1)" class="q-mr-md" />
-      <q-btn label="Next" @click="changeMonth(1)" lass="q-mr-md" />
+      <q-btn round icon="chevron_right" @click="changeMonth(1)" class="q-mr-sm cal-btn" />
     </div>
-
     <MonthlyView :monthlyData="processedMonthlyData" />
   </div>
 </template>
@@ -98,11 +97,18 @@ export default {
 </script>
 
 <style>
-.border {
-  border: 1px solid green;
+.month-header {
+  /* margin: 0; */
+  /* font-weight: 500; */
 }
-.month-header h4 {
-  margin: 0;
-  font-weight: 500;
+
+.cal-btn {
+  color: white;
+  background-color: #6b11e3;
+
+  width: 18px;
+  height: 18px;
+  font-size: 10px; /* icon size */
+  padding: 0;
 }
 </style>

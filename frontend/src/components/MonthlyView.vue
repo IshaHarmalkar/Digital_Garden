@@ -1,10 +1,5 @@
 <template>
   <div class="monthly-view">
-    <!-- Month Header -->
-    <!-- <div class="month-header q-pa-md">
-      <h4 class="text-center">{{ monthName }}</h4>
-    </div> -->
-
     <!-- Days of Week Header -->
     <div class="days-header row">
       <div
@@ -146,6 +141,11 @@ export default {
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
+  // border: 1px solid grey;
+}
+
+.custom-border-rad {
+  border-radius: 10px;
 }
 
 .month-header h4 {
@@ -176,7 +176,7 @@ export default {
 .day-container {
   flex: 1;
   min-width: 0; /* Important for flex items to shrink properly */
-  margin: 2px 2px;
+  // margin: 2px 2px;
 }
 
 .border {
