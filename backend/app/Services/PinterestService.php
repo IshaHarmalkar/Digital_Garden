@@ -175,7 +175,7 @@ class PinterestService
                 $imageUrl = $media[0]['url'];
             }
 
-            $pinLink = "https://wwww.pinterest.com/pin/{$pinId}/";
+            $pinLink = "https://www.pinterest.com/pin/{$pinId}/";
 
             return [
                 'pin_Id' => $pinId,

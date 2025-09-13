@@ -14,12 +14,12 @@ Schedule::call(function () {
     $recipient = env('NEWSLETTER_RECIPIENT');
     Mail::to($recipient)->send(new WeeklyNewsletterMail);
 
-})->weeklyOn(7, '9:00');
+})->weeklyOn(7, '10:00');
 
-// Schedule::call(function () {
+Schedule::command('notion:sync '.config('services.notion.database_id'))
+    ->weeklyOn(7, '9:00') // Sundays at 2 AM
+    ->withoutOverlapping();
 
-//     Mail::to('example@email.com')->send(new WeeklyNewsletterMail);
-
-// })->weekly(1, 9.00);
-
-Schedule::command('notion:sync YOUR_DATABASE_ID')->daily();
+Schedule::command('pinterest:sync')
+    ->weeklyOn(7, '11:00') // Sundays 11 AM
+    ->withoutOverlapping();

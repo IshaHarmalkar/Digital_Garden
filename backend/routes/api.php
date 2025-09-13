@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\MoodEntryController;
 use App\Http\Controllers\NativeController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\ReflectionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,4 +36,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::post('reflections/', [ReflectionController::class, 'store']);          // Save or update reflection
 Route::get('reflections/today', [ReflectionController::class, 'today']);      // Get today’s reflection
 Route::get('reflections/summary', [ReflectionController::class, 'summary']);  // Get summary for week/month/quarter
+Route::get('reflections/gratitudes', [ReflectionController::class, 'allGratitudes']);
+
+Route::get('reflections/journals', [ReflectionController::class, 'allJournals']);
+
 Route::get('reflections/{date}', [ReflectionController::class, 'show']);      // Get reflection by specific date
+
+// newsletter
+// Route::prefix('newsletter')->group(function () {
+//     Route::get('/{newsletter}/feedback', [NewsletterController::class, 'showFeedback'])
+//         ->name('api.newsletter.feedback.show');
+
+//     Route::post('/feedback', [NewsletterController::class, 'submitFeedback'])
+//         ->name('api.newsletter.feedback.submit');
+// });

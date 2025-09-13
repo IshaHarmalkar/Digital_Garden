@@ -78,4 +78,23 @@ class ReflectionController extends Controller
             'gratitude' => '',
         ]);
     }
+
+    // get all gratitude
+
+    public function allGratitudes()
+    {
+        $gratitudes = Reflection::orderBy('day', 'desc')
+            ->pluck('gratitude', 'day');
+
+        return response()->json($gratitudes);
+    }
+
+    // get all journal
+    public function allJournals()
+    {
+        $journals = Reflection::orderBy('day', 'desc')
+            ->pluck('journal', 'day');
+
+        return response()->json($journals);
+    }
 }

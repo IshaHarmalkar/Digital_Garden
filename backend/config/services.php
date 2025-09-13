@@ -35,9 +35,16 @@ return [
         ],
     ],
 
+    'notion' => [
+        'base_url' => env('NOTION_BASE_URL', 'https://api.notion.com/v1'),
+        'api_token' => env('NOTION_API_TOKEN'),
+        'database_id' => env('NOTION_DATABASE_ID'),
+    ],
+
     'pinterest' => [
         'base_url' => env('PINTEREST_BASE_URL', 'https://api.pinterest.com/v5'),
         'access_token' => env('PINTEREST_ACCESS_TOKEN'),
+
     ],
 
 ];

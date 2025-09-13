@@ -104,9 +104,10 @@ That's it for this week. All the best for the new week.<br>
 
 Your feedback helps us improve future newsletters:
 
-<x-mail::button :url="route('newsletter.feedback', $newsletterId)">
-Rate This Week's Content
+<x-mail::button :url="route('newsletter.feedback.show', $newsletterId)">
+    Rate This Week's Content
 </x-mail::button>
+
 
 <br>
 {{ config('app.name') }}

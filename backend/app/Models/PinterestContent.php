@@ -15,6 +15,17 @@ class PinterestContent extends Model
         'src',
     ];
 
+    protected static function booted()
+    {
+        static::created(function ($content) {
+            // Automatically create a queue entry when a new PinterestContent is created
+            PinterestQueue::create([
+                'pinterest_content_id' => $content->id,
+                'queue_type' => 'main', // default type
+            ]);
+        });
+    }
+
     public function scopeForBoard($query, $boardId)
     {
         return $query->where('board_id', $boardId);
