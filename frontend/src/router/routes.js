@@ -14,7 +14,7 @@ const routes = [
         component: () => import('pages/FeedbackPage.vue'),
         name: 'newsletter-feedback',
       },
-      // { path: 'today', component: () => import('pages/TodayPage.vue') },
+      { path: 'today', component: () => import('pages/TodayPage.vue') },
       // { path: 'summary', component: () => import('pages/SummaryPage.vue') },
     ],
   },

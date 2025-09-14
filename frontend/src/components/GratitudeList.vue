@@ -6,6 +6,7 @@
         label="Gratitude List"
         color="primary"
         class="full-width q-mb-md primary-rounded-btn q-pa-md"
+        @click="gratitudeDialog = true"
       />
     </div>
     <div class="list-content">
@@ -28,16 +29,25 @@
         </div>
       </q-list>
     </div>
+
+    <!-- pop up reflect form -->
+    <q-dialog v-model="gratitudeDialog" persistent>
+      <reflect-form />
+    </q-dialog>
   </div>
 </template>
 
 <script>
+import ReflectForm from './ReflectForm.vue'
 export default {
   name: 'GratitudeList',
+  components: { ReflectForm },
 
   data() {
     return {
       gratitudes: {},
+      gratitudeDialog: false,
+      gratitudeInput: '',
     }
   },
 
