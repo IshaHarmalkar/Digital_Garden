@@ -19,7 +19,8 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:9000'],
+    'allowed_origins' => ['http://localhost:9000',
+        'https://editor.swagger.io', ],
 
     'allowed_origins_patterns' => [],
 

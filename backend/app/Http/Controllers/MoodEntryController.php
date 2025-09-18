@@ -111,4 +111,42 @@ class MoodEntryController extends Controller
         return response()->json($entry, 201);
 
     }
+
+    public function summary(Request $request)
+    {
+        $validated = $request->validate([
+            'start' => 'required|date',
+            'end' => 'required|date|after_or_equal:start',
+        ]);
+
+        $entries = MoodEntry::with('mood:id,primary')
+            ->forDateRange($validated['start'], $validated['end'])
+            ->orderBy('entry_date')
+            ->orderBy('slot')
+            ->get(['id', 'mood_id', 'slot', 'entry_date']);
+
+        // 1. Count of each primary mood (for pie/bar chart)
+        $moodCounts = $entries->groupBy(fn ($e) => $e->mood->primary ?? 'Unknown')
+            ->map->count();
+
+        // 2. Slot-wise distribution (for stacked bar / heatmap)
+        $slotCounts = $entries->groupBy('slot')
+            ->map(fn ($group) => $group->groupBy(fn ($e) => $e->mood->primary ?? 'Unknown')
+                ->map->count()
+            );
+
+        // 3. Timeline (per date: morning/afternoon/night -> primary)
+        $timeline = $entries->groupBy(fn ($e) => $e->entry_date->toDateString())
+            ->map(fn ($dayEntries) => collect(['morning', 'afternoon', 'night'])
+                ->mapWithKeys(fn ($slot) => [
+                    $slot => optional($dayEntries->firstWhere('slot', $slot)?->mood)->primary,
+                ])
+            );
+
+        return response()->json([
+            'counts' => $moodCounts,
+            'slots' => $slotCounts,
+            'timeline' => $timeline,
+        ]);
+    }
 }

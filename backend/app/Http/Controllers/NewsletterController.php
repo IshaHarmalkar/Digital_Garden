@@ -20,17 +20,23 @@ class NewsletterController extends Controller
                 case 'Native':
                     return [
                         'type' => 'Native',
-                        'model' => Native::with('stats')->find($item['id']),
+                        'model' => Native::with(['stats', 'comments' => function ($query) {
+                            $query->orderBy('created_at', 'desc');
+                        }])->find($item['id']),
                     ];
                 case 'Notion':
                     return [
                         'type' => 'Notion',
-                        'model' => NotionContent::with('stats')->find($item['id']),
+                        'model' => NotionContent::with(['stats', 'comments' => function ($query) {
+                            $query->orderBy('created_at', 'desc');
+                        }])->find($item['id']),
                     ];
                 case 'Pinterest':
                     return [
                         'type' => 'Pinterest',
-                        'model' => PinterestContent::with('stats')->find($item['id']),
+                        'model' => PinterestContent::with(['stats', 'comments' => function ($query) {
+                            $query->orderBy('created_at', 'desc');
+                        }])->find($item['id']),
                     ];
             }
         })->filter();
@@ -44,7 +50,9 @@ class NewsletterController extends Controller
     public function submitFeedback(Request $request)
     {
         $statsInput = $request->input('stats', []);
+        $commentsInput = $request->input('comments', []);
 
+        // Handle stats (existing code)
         foreach ($statsInput as $type => $items) {
             foreach ($items as $id => $statData) {
                 $statId = $statData['stat_id'] ?? null;
@@ -74,6 +82,26 @@ class NewsletterController extends Controller
             }
         }
 
-        return back()->with('success', 'Feedback saved!');
+        // Handle comments (new)
+        foreach ($commentsInput as $type => $items) {
+            foreach ($items as $id => $commentData) {
+                if (! empty($commentData['new_comment'])) {
+                    $modelClass = match ($type) {
+                        'Native' => Native::class,
+                        'Notion' => NotionContent::class,
+                        'Pinterest' => PinterestContent::class,
+                    };
+
+                    $model = $modelClass::find($id);
+                    if ($model) {
+                        $model->comments()->create([
+                            'comment' => $commentData['new_comment'],
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return back()->with('success', 'Feedback and comments saved!');
     }
 }

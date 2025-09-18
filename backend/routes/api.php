@@ -3,8 +3,8 @@
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\MoodEntryController;
 use App\Http\Controllers\NativeController;
-use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\ReflectionController;
+use App\Http\Controllers\SpintlyTestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +15,7 @@ Route::get('moods', [MoodEntryController::class, 'moods']);
 Route::post('mood-entries', [MoodEntryController::class, 'store']);
 Route::get('/mood-entries/range', [MoodEntryController::class, 'entriesByRange']);
 Route::get('/mood-entries/range-primary', [MoodEntryController::class, 'entriesPrimaryByRange']);
+Route::get('/mood-entries/summary', [MoodEntryController::class, 'summary']);
 
 Route::get('/mood-entries/all', [MoodEntryController::class, 'index']);
 
@@ -42,11 +43,22 @@ Route::get('reflections/journals', [ReflectionController::class, 'allJournals'])
 
 Route::get('reflections/{date}', [ReflectionController::class, 'show']);      // Get reflection by specific date
 
-// newsletter
-// Route::prefix('newsletter')->group(function () {
-//     Route::get('/{newsletter}/feedback', [NewsletterController::class, 'showFeedback'])
-//         ->name('api.newsletter.feedback.show');
+// spintly integration test
 
-//     Route::post('/feedback', [NewsletterController::class, 'submitFeedback'])
-//         ->name('api.newsletter.feedback.submit');
-// });
+Route::prefix('spintly')->group(function () {
+    Route::get('/sites', [SpintlyTestController::class, 'fetchSites']);
+    Route::get('/access-points', [SpintlyTestController::class, 'fetchAccessPoints']);
+    Route::get('/roles', [SpintlyTestController::class, 'fetchRoles']);
+    Route::get('/users', [SpintlyTestController::class, 'fetchAllUsers']);
+
+    Route::patch('/users', [SpintlyTestController::class, 'updateUser']);
+    Route::post('/users', [SpintlyTestController::class, 'createUser']);
+
+    Route::get('/users/permissions/{userId}', [SpintlyTestController::class, 'fetchUserPermissions']);
+
+    Route::patch('/users/deactivate/{userId}', [SpintlyTestController::class, 'deactivateUser']);
+    Route::patch('/users/activate/{userId}', [SpintlyTestController::class, 'activateUser']);
+
+    Route::delete('/users/{userId}', [SpintlyTestController::class, 'deleteUser']);
+
+});

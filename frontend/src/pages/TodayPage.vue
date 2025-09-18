@@ -1,67 +1,101 @@
 <template>
-  <q-page padding>
-    <q-card class="q-pa-md">
-      <q-card-section>
-        <div class="text-h6">Mood Summary (Last 7 Days)</div>
-      </q-card-section>
+  <q-page class="q-pa-md">
+    <!-- Buttons to open dialogs -->
 
-      <q-separator />
+    <div class="main-container">
+      <div class="row q-ma-md">
+        <!-- <span class="text-h3 plain-font text-primary">Sunday | 14 September 2025</span> -->
+        <span class="text-h3 plain-font text-primary">{{ todayFormatted }}</span>
+      </div>
+      <div class="row">
+        <div class="col q-ma-md">
+          <!-- Analytics -->
+          <mood-analytics />
+          <div class="q-mt-md">
+            <q-btn
+              unelevated
+              label="Mood"
+              color="secondary"
+              icon-right="add_reaction"
+              @click="moodDialog = true"
+              class="full-width q-pa-md primary-rounded-btn"
+            />
+          </div>
+        </div>
 
-      <!-- Counts -->
-      <q-card-section>
-        <div class="text-subtitle1 q-mb-sm">Overall Counts</div>
-        <q-list dense>
-          <q-item v-for="(count, mood) in summary.counts" :key="mood">
-            <q-item-section>{{ mood }}</q-item-section>
-            <q-item-section side>{{ count }}</q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
+        <div class="col q-ma-md">
+          <!-- gratitude -->
+          <gratitude-list />
+        </div>
+      </div>
+    </div>
 
-      <q-separator />
+    <!-- Mood Form Dialog -->
+    <q-dialog v-model="moodDialog" persistent>
+      <q-card class="q-pa-md" style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">Mood Form</div>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <mood-form />
+        </q-card-section>
+        <q-card-actions align="right">
+          <!-- Close button -->
+          <q-btn flat label="Close" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
-      <!-- Timeline -->
-      <q-card-section>
-        <div class="text-subtitle1 q-mb-sm">Daily Timeline</div>
-        <q-list bordered separator>
-          <q-item v-for="(slots, date) in summary.timeline" :key="date">
-            <q-item-section>
-              <div class="text-bold">{{ date }}</div>
-              <div class="text-caption">
-                Morning: {{ slots.morning }} | Afternoon: {{ slots.afternoon }} | Night:
-                {{ slots.night }}
-              </div>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-    </q-card>
+    <!-- Reflect Form Dialog -->
+    <q-dialog v-model="reflectDialog" persistent>
+      <q-card class="q-pa-md" style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">Reflect Form</div>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <reflect-form />
+        </q-card-section>
+        <q-card-actions align="right">
+          <!-- Close button -->
+          <q-btn flat label="Close" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
+import MoodForm from 'src/components/MoodForm.vue'
+import ReflectForm from 'src/components/ReflectForm.vue'
+import MoodAnalytics from 'src/components/MoodAnalytics.vue'
+import GratitudeList from 'src/components/GratitudeList.vue'
+
 export default {
-  name: 'MoodSummaryCard',
+  components: {
+    MoodForm,
+    ReflectForm,
+    MoodAnalytics,
+    GratitudeList,
+  },
   data() {
     return {
-      summary: {
-        counts: {},
-        timeline: {},
-      },
+      moodDialog: false,
+      reflectDialog: false,
     }
   },
-  mounted() {
-    const start = '2025-09-01' // replace with dynamic dates later
-    const end = '2025-09-07'
-
-    this.$api
-      .get(`/mood-entries/summary?start=${start}&end=${end}`)
-      .then((res) => {
-        this.summary = res.data
-      })
-      .catch((err) => {
-        console.error('Error fetching summary', err)
-      })
+  computed: {
+    todayFormatted() {
+      const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }
+      return new Date().toLocaleDateString(undefined, options)
+    },
   },
 }
 </script>
+
+<style scoped>
+.primary-rounded-btn {
+  border-radius: 15px;
+}
+</style>

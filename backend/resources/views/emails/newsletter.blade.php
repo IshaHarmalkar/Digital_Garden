@@ -18,8 +18,8 @@ Here's your curated review for the week:
 </div>
 @if($pins->isNotEmpty())
 ## Your Pinterest Inspiration
-@foreach ($pins as $pin)
-<div style="text-align: center; margin: 20px 0;">
+{{-- @foreach ($pins as $pin)
+<div style="text-align: center; margin: 20px 0;"> --}}
 
  
   {{-- mail/pins.blade.php --}}
@@ -45,7 +45,7 @@ Here's your curated review for the week:
 
 ---
 
-@endforeach
+{{-- @endforeach --}}
 @else
 *No new Pinterest pins this week.*
 @endif

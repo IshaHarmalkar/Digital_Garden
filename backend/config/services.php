@@ -47,4 +47,11 @@ return [
 
     ],
 
+    'spintly' => [
+        'base_url' => env('SPINTLY_BASE_URL'),
+        'access_token' => env('SPINTLY_ACCESS_TOKEN'),
+        'org_id' => env('SPINTLY_ORG_ID'),
+        'site_id' => env('SPINTLY_SITE_ID'),
+    ],
+
 ];

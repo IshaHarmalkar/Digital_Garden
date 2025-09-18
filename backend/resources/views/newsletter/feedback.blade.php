@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="feedback-page">
-    <h1 class="page-title">Feedback for Newsletter #{{ $newsletter->id }}</h1>
+    <h1 class="page-title">Feedback（￣︶￣）↗　</h1>
 
     @if(session('success'))
         <div class="alert-success">
@@ -46,6 +46,21 @@
                             📌 <a href="{{ $model->pin_link }}" target="_blank" class="content-link">Go to Pin</a>
                         </div>
                     @endif
+
+                    {{-- Existing Comments Section --}}
+                    @if($model->comments && $model->comments->count() > 0)
+                        <div class="comments-section">
+                            <h4 class="comments-title">💬 Comments ({{ $model->comments->count() }})</h4>
+                            <div class="comments-list">
+                                @foreach($model->comments as $comment)
+                                    <div class="comment-item">
+                                        <div class="comment-text">{{ $comment->comment }}</div>
+                                        <div class="comment-date">{{ $comment->created_at->diffForHumans() }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Right column: Feedback --}}
@@ -75,6 +90,16 @@
                         </label>
                     </div>
 
+                    {{-- Add Comment Section --}}
+                    <div class="comment-section">
+                        <h5 class="comment-section-title">💭 Add Comment</h5>
+                        <textarea 
+                            name="comments[{{ $item['type'] }}][{{ $model->id }}][new_comment]"
+                            class="comment-textarea"
+                            placeholder="Add your thoughts..."
+                            rows="3"></textarea>
+                    </div>
+
                     <input type="hidden"
                            name="stats[{{ $item['type'] }}][{{ $model->id }}][stat_id]"
                            value="{{ $stats->id }}">
@@ -83,7 +108,7 @@
         @endforeach
 
         <div class="form-footer">
-            <button type="submit" class="btn-submit">Submit Feedback</button>
+            <button type="submit" class="btn-submit">Submit Feedback & Comments</button>
         </div>
     </form>
 </div>
@@ -186,6 +211,39 @@ document.addEventListener("DOMContentLoaded", () => {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+/* Comments styles */
+.comments-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+.comments-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #374151;
+}
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.comment-item {
+    background: #f9fafb;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border-left: 3px solid #3b82f6;
+}
+.comment-text {
+    font-size: 0.875rem;
+    color: #374151;
+    margin-bottom: 0.25rem;
+}
+.comment-date {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
 .feedback-sidebar {
     width: 16rem;
     border-left: 1px solid #e5e7eb;
@@ -231,15 +289,42 @@ document.addEventListener("DOMContentLoaded", () => {
     color: #374151;
 }
 
+/* Comment section styles */
+.comment-section {
+    margin-top: 1rem;
+}
+.comment-section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+.comment-textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    resize: vertical;
+    min-height: 4rem;
+    font-family: inherit;
+}
+.comment-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
 .form-footer {
     text-align: center;
 }
 .btn-submit {
     background: #3b82f6;
     color: #fff;
-    padding: 0.5rem 1.5rem;
+    padding: 0.75rem 2rem;
     border-radius: 0.5rem;
     font-weight: 500;
+    font-size: 1rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: background 0.2s ease;
 }
@@ -259,5 +344,8 @@ document.addEventListener("DOMContentLoaded", () => {
 .btn-link:hover {
     background: #2563eb;
 }
+
+.mb-4 { margin-bottom: 1rem; }
+.mt-3 { margin-top: 0.75rem; }
 </style>
 @endsection

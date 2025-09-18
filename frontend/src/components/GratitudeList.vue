@@ -4,9 +4,10 @@
       <q-btn
         unelevated
         label="Gratitude List"
-        color="primary"
+        color="secondary"
         class="full-width q-mb-md primary-rounded-btn q-pa-md"
         @click="gratitudeDialog = true"
+        icon-right="add_reaction"
       />
     </div>
     <div class="list-content">
