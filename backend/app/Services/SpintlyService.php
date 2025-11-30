@@ -30,11 +30,14 @@ class SpintlyService
         return "https://saams.api.spintly.com/organisationManagement/v2/integrator/organisations/{$this->orgId}/sites";
     }
 
+
     public function getOrgId()
     {
         return $this->orgId;
     }
 
+
+    
     public function test()
     {
         return "{$this->baseUrl}/userManagement/integrator/v1/organisations/{$this->orgId}/formData?roles=roles";
@@ -68,6 +71,8 @@ class SpintlyService
         return $response->json(); // return decoded JSON
     }
 
+
+
     public function getAccessPoints()
     {
         $url = "{$this->baseUrl}/organisationManagement/v1/integrator/organisations/{$this->orgId}/sites/{$this->siteId}/accessPoints/list";   // hardcoded endpoint
@@ -96,6 +101,8 @@ class SpintlyService
 
     }
 
+
+
     // get roles
     public function getRoles()
     {
@@ -117,6 +124,8 @@ class SpintlyService
         return $response->json();
 
     }
+
+
 
     // get roles
     public function getAllUSers()
@@ -152,6 +161,8 @@ class SpintlyService
 
     }
 
+
+
     public function createUser(array $data): array
     {
         $url = "{$this->baseUrl}/userManagement/integrator/v1/organisations/{$this->orgId}/users/create";
@@ -171,6 +182,8 @@ class SpintlyService
 
         return $response->json();
     }
+
+
 
     public function updateUser(array $data): array
     {
@@ -192,10 +205,12 @@ class SpintlyService
         return $response->json();
     }
 
+
+
     public function getUserPermission($userId)
     {
         $url = "{$this->baseUrl}/accessManagementV3/integrator/v1/organisations/{$this->orgId}/users/{$userId}/permissions";
-        dump('URL:', $url);
+       
 
         $body = [
             'sites' => [],
@@ -217,6 +232,8 @@ class SpintlyService
         return $response->json();
 
     }
+
+
 
     // Deactivate Users
     public function deactivateUser($userId)
@@ -247,6 +264,8 @@ class SpintlyService
         return $response->json();
     }
 
+
+
     // Activate Users
     public function activateUser($userId)
     {
@@ -275,6 +294,8 @@ class SpintlyService
 
         return $response->json();
     }
+
+
 
     public function deleteUser($userId)
     {

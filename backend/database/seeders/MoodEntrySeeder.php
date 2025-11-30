@@ -12,7 +12,7 @@ class MoodEntrySeeder extends Seeder
     public function run(): void
     {
         $start = Carbon::create(2025, 8, 1);
-        $end = Carbon::create(2025, 10, 31);
+        $end = Carbon::create(2025, 11, 25);
 
         $slots = ['morning', 'afternoon', 'night'];
 
@@ -41,8 +41,8 @@ class MoodEntrySeeder extends Seeder
 
         $this->command->info('Mood entries seeded from August 1, 2025 to October 31, 2025');
     }
-
-    public function entriesForPeriod(Request $request)
+ 
+    /* public function entriesForPeriod(Request $request)
     {
         $validated = $request->validate([
             'start' => 'required|date',
@@ -55,6 +55,6 @@ class MoodEntrySeeder extends Seeder
             ->orderBy('slot')
             ->get();
 
-        return response()->json($entries);
-    }
+         return response()->json($entries);
+    } */
 }

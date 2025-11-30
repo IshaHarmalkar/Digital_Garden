@@ -21,9 +21,14 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
+            MoodSeeder::class,
+            MoodEntrySeeder::class,
             NativeSeeder::class,
             NativeQueueSeeder::class,
             NotionQueueSeeder::class,
+            PinterestContentSeeder::class,
+            PinterestQueueSeeder::class,
+
 
         ]);
     }
