@@ -1,5 +1,6 @@
 # 🌻 Curated
 
+Favorite Projecto(_￣︶￣_)o
 A Readwise equivalent tool for resurfacing, and revisiting content from **Notion** and **Pinterest**. It also had a mood tracker using the feelings wheel method, journal note and a gratitude list as I find this practices pretty helpful.
 
 ---
@@ -59,8 +60,8 @@ curated/
 ### **Clone the project**
 
 ```sh
-git clone <your-repo-url>
-cd curated
+git clone https://github.com/IshaHarmalkar/Digital_Garden.git
+cd Digital_Garden
 ```
 
 ---
@@ -101,24 +102,6 @@ Frontend:
 ```sh
 quasar dev
 ```
-
----
-
-## 🌻 Build Commands
-
-### Frontend (Quasar)
-
-```sh
-quasar build
-```
-
-### Backend
-
-```sh
-php artisan optimize
-```
-
----
 
 ---
 
