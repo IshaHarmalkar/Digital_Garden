@@ -132,10 +132,22 @@ Feel free to open an issue for bugs, feature requests, or improvements.
 
 ### 🌻 Home Page
 
-![Newsletter](screenshots/home.png)
+![Dashboard](screenshots/dashboard.png)
 
-### 🌻 Daily Digest
+### 🌻 Weekly Newsletter
 
-![Dashboard](screenshots/digest.png)
+![Newsletter](screenshots/newsletter_1.png)
+
+### 🌻 Monthly Calendar View
+
+![Calendar](screenshots/calendar.png)
+
+### 🌻 Daily View
+
+![Newsletter](screenshots/daily_view.png)
+
+### 🌻 Log Mood
+
+![Newsletter](screenshots/mood_log.png)
 
 ---
