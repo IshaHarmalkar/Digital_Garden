@@ -15,6 +15,7 @@ const routes = [
         name: 'newsletter-feedback',
       },
       { path: 'today', component: () => import('pages/TodayPage.vue') },
+      {path: 'cur', component: () => import('pages/CurPage.vue')},
       // { path: 'summary', component: () => import('pages/SummaryPage.vue') },
     ],
   },

@@ -75,6 +75,8 @@ export default {
         { title: 'Today', caption: 'Daily overview', icon: 'today', link: '/today' },
         { title: 'Summary', caption: 'Trends & Reports', icon: 'bar_chart', link: '/summary' },
         { title: 'Feedback', caption: 'Feedback', icon: 'assistant', link: '/feedback' },
+        { title: 'Cur', caption: 'Cur', icon: 'cat', link: '/cur' },
+
       ],
     }
   },
