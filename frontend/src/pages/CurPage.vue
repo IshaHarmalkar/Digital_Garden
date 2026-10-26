@@ -1,13 +1,15 @@
 <template>
   <q-page class="flex flex-center">
-   <h1> Cur Page</h1>
+    <div>
+      <MasonryGrid></MasonryGrid>
+    </div>
   </q-page>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import MasonryGrid from 'src/components/MasonryGrid.vue'
 
-export default defineComponent({
-  name: 'IndexPage',
-})
+export default {
+  components: { MasonryGrid },
+}
 </script>
