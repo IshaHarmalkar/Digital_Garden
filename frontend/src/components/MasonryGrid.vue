@@ -28,7 +28,7 @@
 
 <script>
 export default {
-  components: 'MasonryGrid',
+  name: 'MasonryGrid',
 
   props: {
     items: { type: Array, required: true },
@@ -72,7 +72,7 @@ export default {
       this.syncItems()
     },
     'items.length'() {
-      this.syncItems
+      this.syncItems()
     },
 
     colCount() {
@@ -96,10 +96,12 @@ export default {
     this.width = this.$refs.root.clientWidth
     this.layout(true)
 
-    this.resizeObs = new ResizeObserverEntry(([entry]) => {
+    this.resizeObs = new ResizeObserver(([entry]) => {
       const w = Math.round(entry.contentRect.width)
       if (w !== this.width) this.width = w
     })
+
+    this.resizeObs.observe(this.$refs.root)
 
     this.intersectObs = new IntersectionObserver(
       ([entry]) => {
@@ -142,7 +144,7 @@ export default {
 
         let target = 0
         for (let i = 1; i < n; i++) {
-          if (this.height[i] < this.height[target]) target = i
+          if (this.heights[i] < this.heights[target]) target = i
         }
 
         next[target].push(item)
@@ -155,7 +157,8 @@ export default {
 
     observeSentinel() {
       const el = this.$refs.sentinel
-      if (!this.intersectObs || !el) this.intersectObs.unobserve(el)
+      if (!this.intersectObs || !el) return
+
       this.intersectObs.unobserve(el)
       this.intersectObs.observe(el)
     },

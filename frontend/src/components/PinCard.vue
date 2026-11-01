@@ -1,9 +1,17 @@
 <template>
   <article class="pin">
-    <div class="pin__media">
-      :style="{ aspectRatio: `${pin.width} / ${pin.height}`, backgroundColor: pin.color || `#e9e9e9`
-      }" role="button" tabindex="0" :aria-label="`Open ${pin.title}`" @click="$emit('open', pin)"
-      @keydown.enter="$emit('open', pin)">
+    <div
+      class="pin__media"
+      :style="{
+        aspectRatio: `${pin.width} / ${pin.height}`,
+        backgroundColor: pin.color || `#e9e9e9`,
+      }"
+      role="button"
+      tabindex="0"
+      :aria-label="`Open ${pin.title}`"
+      @click="$emit('open', pin)"
+      @keydown.enter="$emit('open', pin)"
+    >
       <img
         :src="pin.src"
         :alt="pin.title"
@@ -151,6 +159,7 @@ export default {
       font-weight: 600;
       display: -webkit-box;
       -webkit-line-clamp: 2;
+      // line-clamp: ;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }

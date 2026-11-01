@@ -1,147 +1,211 @@
 <template>
-  <q-page class="flex flex-center">
-    <div>
-      <MasonryGrid></MasonryGrid>
+  <q-page class="pins-page">
+    <header class="pins-page__bar">
+      <div class="pins-page__top">
+        <q-icon name="push_pin" color="primary" size="28px" class="pins-page__logo"></q-icon>
+        <q-input
+          dense
+          rounded
+          outlined
+          clearable
+          placeholder="Search ideas"
+          class="pins-page__search"
+          color="primary"
+        >
+          <template #prepend>
+            <q-icon name="search"></q-icon>
+          </template>
+        </q-input>
+      </div>
+
+      <div class="pins-page__chips" role="tablist">
+        <q-chip
+          v-for="c in categories"
+          :key="c"
+          clickable
+          :color="category === c ? 'primary' : 'grey-3'"
+          :text-color="category === c ? 'white' : 'grey-9'"
+          :label="c"
+          role="tab"
+          :aria-selected="category === c"
+          @click="selectCategory(c)"
+        ></q-chip>
+      </div>
+    </header>
+
+    <div class="pins-page__grid">
+      <MasonryGrid :items="pins" :loading="loading" :finished="finished" @load-more="loadMore">
+        <template #item="{ item }">
+          <PinCard
+            :pin="item"
+            :saved="savedIds.has(item.id)"
+            @open="openPin"
+            @toggle-save="toggleSave"
+          >
+          </PinCard>
+        </template>
+      </MasonryGrid>
     </div>
   </q-page>
 </template>
 
 <script>
-import { ionMdReturnLeft } from '@quasar/extras/ionicons-v4'
 import MasonryGrid from 'src/components/MasonryGrid.vue'
+import PinCard from 'src/components/PinCard.vue'
+
+const TITLES = [
+  'Slow morning light',
+  'Concrete and ferns',
+  'Small kitchen, big ideas',
+  'Weekend trail notes',
+  'Ceramic shelf styling',
+  'Rooftop herb garden',
+  'Linen everything',
+  'Harbor at dusk',
+  'Sketchbook spreads',
+  'Plan corner',
+]
+
+const AUTHORS = ['Maya', 'Leo', 'Priya', 'Sam', 'Noor', 'Chen']
+const TONES = ['#f3d9d6', '#d9e4e0', '#e6dfd2', '#d8dde8', '#ecd6c9', '#dcdcdc']
+
+const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
 
 export default {
-  components: 'MasonryGrid',
-
-  props: {
-    items: { type: Array, required: true },
-    itemKey: { type: String, default: 'id' },
-    gap: { type: Number, default: 12 },
-    columns: {
-      type: Number,
-      default: 0,
-    },
-    captionHeight: { type: Number, default: 60 },
-    loading: { type: Boolean, default: false },
-    finished: { type: Boolean, default: false },
-    rootMargin: { type: String, default: '90px' },
-  },
-
-  emits: ['load-more'],
+  name: 'PinsPage',
+  components: { MasonryGrid, PinCard },
 
   data() {
     return {
-      width: 0,
-      cols: [],
-      skeletonHeights: [220, 300, 180, 260, 240, 200],
+      pins: [],
+      loading: false,
+      finished: false,
+      category: 'All',
+      categories: ['All', 'Home', 'Travel', 'Food', 'Art', 'Garden', 'Style'],
+      savedIds: new Set(),
+      nextId: 1,
     }
   },
 
-  computed: {
-    colCount() {
-      if (this.columns) return this.columns
-      const w = this.width
-
-      if (w >= 1500) return 6
-      if (w >= 1200) return 5
-      if (w >= 900) return 4
-      if (w >= 600) return 3
-      return 2
-    },
-  },
-
-  watch: {
-    items() {
-      this.syncItems()
-    },
-    'items.length'() {
-      this.syncItems
-    },
-
-    colCount() {
-      this.layout(true)
-    },
-
-    loading(isLoading) {
-      if (!isLoading) this.observeSentinel()
-    },
-  },
-
-  created() {
-    this.heights = []
-    this.placed = 0
-    this.firstItem = null
-    this.resizeObs = null
-    this.intersectObs = null
-  },
-
-  mounted() {
-    this.width = this.$refs.root.clientWidth
-    this.layout(true)
-
-    this.resizeObs = new ResizeObserverEntry(([entry]) => {
-      const w = Math.round(entry.contentRect.width)
-      if (w !== this.width) this.width = w
-    })
-
-    this.intersectObs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !this.loading && !this.finished) {
-          this.$emit('load-more')
-        }
-      },
-      {
-        rootMargin: this.rootMargin,
-      },
-    )
-    this.observeSentinel()
-  },
-
-  beforeUnmount() {
-    if (this.resizeObs) this.resizeObs.disconnect()
-    if (this.intersectObs) this.intersectObs.disconnect()
-  },
-
   methods: {
-    syncItems() {
-      const replaced = this.items.length < this.placed || this.items[0] !== this.firstItem
-      this.layout(replaced)
+    fetchPins(count = 20) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(
+            Array.from({ length: count }, () => {
+              const id = this.nextId++
+              const width = 600
+              const height = rand(360, 1000)
+              return {
+                id,
+                width,
+                height,
+                src: `https://picsum.photos/seed/pin${id}/${width}/${height}`,
+                title: TITLES[id % TITLES.length],
+                author: AUTHORS[id % AUTHORS.length],
+                color: TONES[id % TONES.length],
+              }
+            }),
+          )
+        }, 700)
+      })
     },
 
-    layout(reset = false) {
-      const n = this.colCount
-      if (reset || this.cols.length !== n) {
-        this.cols = Array.from({ length: n }, () => [])
-        this.heights = Array(n).fill(0)
-        this.placed = 0
-      }
+    async loadMore() {
+      if (this.loading || this.finished) return
+      this.loading = true
+      const batch = await this.fetchPins(20)
+      this.pins = [...this.pins, ...batch] //appends, exisitng pins stay put
 
-      const colWidth = Math.max((this.width - this.gap * (n - 1)) / n, 1)
-      const next = this.cols.map((c) => c.slice())
-
-      for (; this.placed < this.items.length; this.placed++) {
-        const item = this.items[this.placed]
-        const ratio = item.width && item.height ? item.height / item.width : 1.3
-
-        let target = 0
-        for (let i = 1; i < n; i++) {
-          if (this.height[i] < this.height[target]) target = i
-        }
-
-        next[target].push(item)
-        this.heights[target] += ratio * colWidth + this.captionHeight + this.gap
-      }
-
-      this.firstItem = this.items[0] || null
-      this.cols = next
+      this.loading = false
+      if (this.pins.length >= 100) this.finished = true
     },
 
-    observeSentinel() {
-      const el = this.$refs.sentinel
-      if (!this.intersectObs || !el) this.intersectObs.unobserve(el)
-      this.intersectObs.unobserve(el)
-      this.intersectObs.observe(el)
+    selectCategory(name) {
+      this.category = name
+      this.nextId = 1
+      this.finished = false
+      this.pins = []
+      this.loadMore()
+    },
+
+    toggleSave(pin) {
+      if (this.savedIds.has(pin.id)) {
+        this.savedIds.delete(pin.id)
+      } else {
+        this.savedIds.add(pin.id)
+        this.$q.notify({
+          message: 'Saved to your board',
+          icon: 'bookmark',
+          color: 'dark',
+          position: 'bottom',
+          timeout: 1600,
+        })
+      }
+    },
+
+    openPin(pin) {
+      //eg this.$router.push({name: 'pin', params: {id: pin.id}})
+      console.log('open', pin.id)
     },
   },
 }
 </script>
+
+<style scoped lang="scss">
+.pins-page {
+  &__bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--q-page-bg, #fff);
+    padding: env(safe-area-inset-top, 0) 12px 0;
+  }
+
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  &__search {
+    flex: 1;
+  }
+
+  &__chips {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    padding: 8px 0 6px;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    :deep(.q-chip) {
+      margin: 0 4px 0 0;
+      flex: none;
+      font-weight: 600;
+    }
+  }
+
+  &__grid {
+    padding: 4px 8px calc(16px + env(ssafe-area-inset-bottom, 0));
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 600px) {
+  .pins-page {
+    &__bar {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+    &__grid {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  }
+}
+</style>
